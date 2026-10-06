@@ -1252,11 +1252,11 @@ const vsk = () => (S.vskill ? `Use the ${S.vskill} skill. ` : `About ${vname()}:
 function s2Ask() {
   const v = vname(), vs = S.vskill;
   return {
-    make: vsk() + `Create a folder called "${v}" at the top of my Google Drive, and inside it four folders: ${FOLDERS.map(f => '"' + f + '"').join(', ')}. Create nothing else. When you are done, list the folder.`,
-    see: vsk() + `Search ${folderRef()}. List its folders and the files in each, with dates. Use only that folder, nothing else in my Drive.`,
+    make: `Create a folder called "${v}" at the top of my Google Drive, and inside it four folders: ${FOLDERS.map(f => '"' + f + '"').join(', ')}. Create nothing else. When you are done, list the folder.`,
+    see: `Search ${folderRef()}. List its folders and the files in each, with dates. Use only that folder, nothing else in my Drive.`,
     fill: (vs ? `Use the ${vs} skill. ` : `About ${v}: ${one(S.venture.idea) || '[what it does, who it is for, where, and the stage]'}\n\n`) + `Create two files in ${folderRef()}.\n\n1. In "00 Venture", a file "about-${slug(v) || 'venture'}.md": what ${v} does, for whom, where, the stage, the team, and what we are deciding this month. ${vs ? 'Take it from the ' + vs + ' skill.' : 'Ask me what you do not know, one question at a time.'} Add nothing I did not say.\n\n2. In "01 Discovery", a file "assumption-register.md": a table of the 8 to 12 assumptions that have to be true for ${v} to work, with columns ID, assumption, impact if wrong (high, medium, low), how unsure we are (high, medium, low), evidence so far with its source and date, or "none yet". If I attached pages from last time, take the assumptions and the evidence from them; otherwise use what you know about ${v} and mark every evidence "none yet".\n\nShow me both files before you save them. Create nothing anywhere else.`,
-    rank: withVenture(`Use the prioritize-assumptions skill.\n\nRead the assumption register in ${folderRef()}, folder "01 Discovery". Rank the assumptions by impact and risk, and for each one say: test it, go ahead, defer it or drop it. End with the three to test first, and why.\n\nSave the result as "${rankFile()}" in ${folderRef()}, folder "02 Validation". Show it to me first. Name the file you read, and add no assumptions of your own.`),
-    design: withVenture(isSolo()
+    rank: (`Use the prioritize-assumptions skill.\n\nRead the assumption register in ${folderRef()}, folder "01 Discovery". Rank the assumptions by impact and risk, and for each one say: test it, go ahead, defer it or drop it. End with the three to test first, and why.\n\nSave the result as "${rankFile()}" in ${folderRef()}, folder "02 Validation". Show it to me first. Name the file you read, and add no assumptions of your own.`),
+    design: (isSolo()
       ? `Use the experiment-designer skill.\n\nRead "ranked-assumptions.md" in ${folderRef()}, folder "02 Validation". For each of the three assumptions to test first, design one cheap experiment that measures what people do, not what they say: one main metric, how many people, how long it runs, and a pass mark fixed now, before it starts.\n\nLay it out as a four-week plan, one line per experiment: week, experiment, assumption, metric, pass if, owner. Save it as "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Show it to me first.`
       : `Use the experiment-designer skill.\n\nRead every file in ${folderRef()}, folder "02 Validation", whose name starts with "ranked-assumptions". Name each file you read. If there is more than one, compare them first: where the rankings agree, where they disagree, and which three assumptions to test first once you take all of them into account, with one line on why.\n\nThen, for those three, design one cheap experiment each that measures what people do, not what they say: one main metric, how many people, how long it runs, and a pass mark fixed now, before it starts.\n\nLay it out as a four-week plan, one line per experiment: week, experiment, assumption, metric, pass if, owner. Save it as "validation-sprint.md" in the same folder. Show it to me first.`),
     keep: `This changes what you have on file about ${v}: our riskiest assumption is [the one ranked first] and our validation sprint runs from [date] to [date].${vs ? ` Update the ${vs} skill: show me the old line and the new line first.` : ''}`,
@@ -1273,53 +1273,53 @@ const CONNECTORS = [
     tagline: 'Your team folder.',
     what: 'Reads the files in your Drive and can create files there. Your team folder lives here.',
     check: () => s2Ask().see, checkExpect: 'It lists your four folders and their files, nothing else.',
-    uses: [['File your interview notes', () => vsk() + `Attached are notes from an interview we did today. Save them in ${folderRef()}, folder "Inbox", as "INT-[number]-[date].md". Change nothing in the notes.`, 'One new file in Inbox.'],
-      ['Ask across all your files', () => vsk() + `Read every file in ${folderRef()}. What do we believe about our customer that no file gives evidence for? Quote the file for everything you take from one.`, 'An answer that names files.']],
+    uses: [['File your interview notes', () => `Attached are notes from an interview we did today. Save them in ${folderRef()}, folder "Inbox", as "INT-[number]-[date].md". Change nothing in the notes.`, 'One new file in Inbox.'],
+      ['Ask across all your files', () => `Read every file in ${folderRef()}. What do we believe about our customer that no file gives evidence for? Quote the file for everything you take from one.`, 'An answer that names files.']],
     may: 'Read the folder. Create files where a message says.', not: 'Touch anything outside the folder.' },
   { id: 'google-sheets', name: 'Google Sheets', logo: 'googlesheets', c: '#34A853',
     tagline: 'Your results, row by row.',
     what: 'Comes with Google Drive: nothing more to connect. Reads a spreadsheet and can create one.',
-    check: () => vsk() + `Read the sheet "Experiment results" in ${folderRef()}, folder "02 Validation", and tell me its columns. Change nothing.`, checkExpect: 'It names the columns.',
-    uses: [['Make the results sheet', () => vsk() + `Read "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Create a Google Sheet "Experiment results" in the same folder: one row per experiment, columns date, experiment, metric, people, result, pass mark. Show me first.`, 'One sheet, one row per experiment.'],
-      ['Read the results', () => vsk() + `Read "Experiment results" in ${folderRef()}, folder "02 Validation". For each experiment say pass, fail or too early, with the numbers. Change no pass mark.`, 'Pass, fail or too early, with numbers.']],
+    check: () => `Read the sheet "Experiment results" in ${folderRef()}, folder "02 Validation", and tell me its columns. Change nothing.`, checkExpect: 'It names the columns.',
+    uses: [['Make the results sheet', () => `Read "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Create a Google Sheet "Experiment results" in the same folder: one row per experiment, columns date, experiment, metric, people, result, pass mark. Show me first.`, 'One sheet, one row per experiment.'],
+      ['Read the results', () => `Read "Experiment results" in ${folderRef()}, folder "02 Validation". For each experiment say pass, fail or too early, with the numbers. Change no pass mark.`, 'Pass, fail or too early, with numbers.']],
     may: 'Read. Create the sheet once.', not: 'Change a pass mark.' },
   { id: 'notion', name: 'Notion', logo: 'notion', c: '#000000',
     tagline: 'Your assumptions as a living page.',
     what: 'Reads your Notion pages and can create and update them.',
-    check: () => vsk() + `Find our page "${vname()} assumptions" in Notion and read it. Which assumption has the least evidence? Change nothing.`, checkExpect: 'It quotes the page. Nothing changed.',
-    uses: [['Move your register into Notion', () => vsk() + `Read the assumption register in ${folderRef()}, folder "01 Discovery". Create a Notion database "${vname()} assumptions", one row per assumption. Show me the rows first.`, 'The same rows, nothing added.'],
-      ['Update it after an interview', () => vsk() + `Here are today's interview notes: [paste]. Read "${vname()} assumptions" in Notion and show me, row by row, the old text and the new text. Update only after I say yes.`, 'Old and new text, then a wait for your yes.']],
+    check: () => `Find our page "${vname()} assumptions" in Notion and read it. Which assumption has the least evidence? Change nothing.`, checkExpect: 'It quotes the page. Nothing changed.',
+    uses: [['Move your register into Notion', () => `Read the assumption register in ${folderRef()}, folder "01 Discovery". Create a Notion database "${vname()} assumptions", one row per assumption. Show me the rows first.`, 'The same rows, nothing added.'],
+      ['Update it after an interview', () => `Here are today's interview notes: [paste]. Read "${vname()} assumptions" in Notion and show me, row by row, the old text and the new text. Update only after I say yes.`, 'Old and new text, then a wait for your yes.']],
     may: 'Read. Propose changes.', not: 'Edit before you say yes.' },
   { id: 'google-calendar', name: 'Google Calendar', logo: 'googlecalendar', c: '#4285F4',
     tagline: 'Your check-ins and interviews, booked.',
     what: 'Reads your events and can create new ones.',
-    check: () => vsk() + `What is on my calendar in the next 7 days that matters for ${vname()}? Read only.`, checkExpect: 'A short list from your real calendar.',
-    uses: [['Put the sprint on the calendar', () => vsk() + `Read "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Propose four weekly 30-minute check-ins, starting next Monday at 18:00. Show me the list. Create nothing until I say yes.`, 'Four dates, then a wait for your yes.'],
-      ['Find interview slots', () => vsk() + `We need five 20-minute calls next week. Read my calendar and propose ten free slots, Monday to Friday, 10:00 to 18:00. Create nothing.`, 'Ten free slots.']],
+    check: () => `What is on my calendar in the next 7 days that matters for ${vname()}? Read only.`, checkExpect: 'A short list from your real calendar.',
+    uses: [['Put the sprint on the calendar', () => `Read "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Propose four weekly 30-minute check-ins, starting next Monday at 18:00. Show me the list. Create nothing until I say yes.`, 'Four dates, then a wait for your yes.'],
+      ['Find interview slots', () => `We need five 20-minute calls next week. Read my calendar and propose ten free slots, Monday to Friday, 10:00 to 18:00. Create nothing.`, 'Ten free slots.']],
     may: 'Read. Create events after you say yes.', not: 'Move or delete events.' },
   { id: 'gmail', name: 'Gmail', logo: 'gmail', c: '#EA4335',
     tagline: 'Invitations and follow-ups, drafted.',
     what: 'Reads your mail and writes drafts. It may be able to send, so you never ask it to.',
-    check: () => vsk() + `Search my mail for replies about ${vname()} in the last 14 days: who, date, one line each. Read only.`, checkExpect: 'A list from your inbox. Nothing sent.',
+    check: () => `Search my mail for replies about ${vname()} in the last 14 days: who, date, one line each. Read only.`, checkExpect: 'A list from your inbox. Nothing sent.',
     uses: [['Invite someone to an interview', () => vsk() + `Draft, do not send, an email inviting [name] to a 20-minute call next week about [what you want to learn]. Two short paragraphs, in my words. Leave it as a draft.`, 'A draft. You press send.'],
-      ['Count the replies', () => vsk() + `We sent [number] emails about ${vname()} on [date]. Search my mail for the replies and count: replied, yes to a call, no. Numbers and names only. Read only.`, 'Numbers to compare with your pass mark.']],
+      ['Count the replies', () => `We sent [number] emails about ${vname()} on [date]. Search my mail for the replies and count: replied, yes to a call, no. Numbers and names only. Read only.`, 'Numbers to compare with your pass mark.']],
     may: 'Read. Draft.', not: 'Send. You press send yourself.' },
   { id: 'stripe', name: 'Stripe', logo: 'stripe', c: '#635BFF',
     tagline: 'Who actually paid.',
     what: 'Reads your payments and customers.',
-    check: () => vsk() + `How many payments did we receive in the last 7 days, from how many customers? Read only.`, checkExpect: 'Numbers with dates.',
-    uses: [['Read a pre-order test', () => vsk() + `Our pre-order experiment ran from [date] to [date] with a pass mark of [number] payments. Read our Stripe payments for those dates: did it pass? Count and first names only. Read only.`, 'Pass or fail against your mark.']],
+    check: () => `How many payments did we receive in the last 7 days, from how many customers? Read only.`, checkExpect: 'Numbers with dates.',
+    uses: [['Read a pre-order test', () => `Our pre-order experiment ran from [date] to [date] with a pass mark of [number] payments. Read our Stripe payments for those dates: did it pass? Count and first names only. Read only.`, 'Pass or fail against your mark.']],
     may: 'Read.', not: 'Refund, charge or change anything.' },
   { id: 'slack', name: 'Slack', logo: 'slack', c: '#4A154B',
     tagline: 'The weekly summary, where your team is.',
     what: 'Reads channels and can post.',
-    check: () => vsk() + `Read the last 20 messages in our channel #[channel] and tell me in three lines what the team decided. Post nothing.`, checkExpect: 'Three lines, nothing posted.',
-    uses: [['Post the weekly summary', () => vsk() + `Read "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Write five lines on where each experiment stands, for #[channel]. Show me. Post only when I say yes.`, 'Five lines, then a wait for your yes.']],
+    check: () => `Read the last 20 messages in our channel #[channel] and tell me in three lines what the team decided. Post nothing.`, checkExpect: 'Three lines, nothing posted.',
+    uses: [['Post the weekly summary', () => `Read "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Write five lines on where each experiment stands, for #[channel]. Show me. Post only when I say yes.`, 'Five lines, then a wait for your yes.']],
     may: 'Read the channel you name. Post after you say yes.', not: 'Post on its own.' },
   { id: 'canva', name: 'Canva', logo: 'canva', c: '#00C4CC',
     tagline: 'The landing page for a smoke test.',
     what: 'Searches, creates and exports designs.',
-    check: () => vsk() + `List my Canva designs from the last 30 days by name and date. Create nothing.`, checkExpect: 'A list of your designs.',
+    check: () => `List my Canva designs from the last 30 days by name and date. Create nothing.`, checkExpect: 'A list of your designs.',
     uses: [['Draft the landing page', () => vsk() + `Draft a one-page landing page for ${vname()} in Canva: one headline for our priority segment, three lines on what we do, one button "Join the waitlist". Take every word from our pages in ${folderRef()}, folder "01 Discovery". Show me the words before you create it.`, 'A draft in your own words.']],
     may: 'Create a draft after you read the words.', not: 'Publish or invent claims.' }
 ];
@@ -2434,7 +2434,7 @@ function skillPage(id) {
         <li class="${sh.ran ? 'done' : ''}"><span class="n">${sh.ran ? ICON.check : 3}</span><div>
           <h2>Run it</h2>
           <p>${ui(m.runStart)} Type <kbd class="ui">${m.call}</kbd> and pick <b>${id}</b>, then send this message with the parts in [brackets] replaced.${m.tryIn ? ' ' + ui(m.tryIn) : ''}</p>
-          ${copyBox('first', withVenture(k.first))}
+          ${copyBox('first', fill(k.first))}
           ${stops.length ? `<p class="say">It works in stages and waits for your answer at each stop. What the skill tells it at each stop:</p><ul class="stops">${stops.map(s => `<li>${ICON.stop}<span><b>After "${esc(s.t)}":</b> "${esc(fill(s.stop))}"</span></li>`).join('')}</ul>` : ''}
           ${tick(id, 'ran', 'I ran it on ' + esc(vname()))}
         </div></li>
@@ -2447,7 +2447,7 @@ function skillPage(id) {
             <p class="expect"><b>It should:</b> ${esc(lowerFirst(fill(t1.e)))} ${m.name} shows the skill's name when it opens one.</p>
             ${tick(id, 't1', 'It started by itself')}</div>
           <div class="test"><h3>Push it to break one of its own rules</h3>
-            ${copyBox('t2', withVenture(t2.p))}
+            ${copyBox('t2', fill(t2.p))}
             <p class="expect"><b>It should:</b> ${esc(lowerFirst(fill(t2.e)))}</p>
             ${tick(id, 't2', 'It kept its rule')}</div>
           <p class="fine">If it does not start by itself, the description is missing the words you used: ask for the job the way the description puts it, or pick the skill by name. If it breaks its rule, tell ${m.name} what went wrong and ask it to update the skill. The manual explains how under "Change a skill".</p>`
