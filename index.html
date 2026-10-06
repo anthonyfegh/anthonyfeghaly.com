@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workbooks</title>
+<meta name="description" content="The AI for Founders workbooks, one per session.">
+<style>
+:root{--desk:#E7E9F0;--ink:#161A2E;--ink-2:#4A5167;--ink-3:#7C8399;--rule:#DDE0EA;--navy:#1E2A63;--s1:#C8371F;--s2:#5236AB;--s3:#0B6477;--s4:#0E5F4A}
+*{box-sizing:border-box}
+body{margin:0;font:400 17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--desk) radial-gradient(#D6DAE8 1.2px,transparent 1.6px) 0 0/28px 28px;-webkit-font-smoothing:antialiased}
+main{max-width:980px;margin:0 auto;padding:64px 20px 80px}
+.kick{font:600 13px/1 ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-size:clamp(34px,6vw,56px);line-height:1;letter-spacing:-.03em;font-weight:700;margin:14px 0 12px}
+.lede{color:var(--ink-2);max-width:56ch;margin:0 0 40px}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:36px 24px}
+.vol{display:block;text-decoration:none;color:inherit}
+.book{--c:var(--navy);display:flex;flex-direction:column;aspect-ratio:3/4;border-radius:5px 14px 14px 5px;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 88%,#fff) 0%,var(--c) 45%,color-mix(in srgb,var(--c) 78%,#000) 100%);color:#fff;position:relative;padding:20px 18px 18px 30px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 26px 40px -28px rgba(22,26,46,.6);transition:transform .2s,box-shadow .2s}
+.book::before{content:"";position:absolute;inset:0 auto 0 0;width:14px;border-radius:5px 0 0 5px;background:linear-gradient(90deg,rgba(0,0,0,.3),rgba(0,0,0,.06))}
+.book i{position:absolute;top:-3px;bottom:-3px;right:26px;width:9px;border-radius:3px;background:color-mix(in srgb,var(--c) 55%,#000)}
+.book small{font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.book b{font-size:24px;line-height:1.1;font-weight:700;letter-spacing:-.01em;margin-top:auto}
+.book span{font-size:13px;opacity:.85;margin-top:8px}
+.vol:hover .book{transform:translateY(-5px) rotate(-.7deg);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 34px 44px -26px rgba(22,26,46,.7)}
+.vol p{color:var(--ink-2);font-size:14.5px;margin:12px 4px 0}
+.vol.soon .book{background:#fff;color:var(--ink-3);border:1.5px dashed #B9BFD0;box-shadow:none}
+.vol.soon .book::before,.vol.soon .book i{display:none}
+.vol.soon:hover .book{transform:none}
+.how{margin-top:56px;background:#fff;border:1px solid var(--rule);border-radius:16px;padding:22px 24px;max-width:640px}
+.how h2{font-size:18px;margin:0 0 8px}
+.how p{margin:0;color:var(--ink-2);font-size:15px}
+footer{margin-top:60px;color:var(--ink-3);font-size:14px}
+footer a{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<main>
+  <p class="kick">AI for Founders · IE Venture Lab</p>
+  <h1>Workbooks</h1>
+  <p class="lede">One workbook per session. Open it in your browser; it remembers your venture on this device.</p>
+  <div class="shelf">
+    <a class="vol" href="/session-1/"><div class="book" style="--c:var(--s1)"><i></i><small>Session 1</small><b>Skills</b><span>Market &amp; customer discovery</span></div><p>Five ready-made skills, and your venture skill.</p></a>
+    <a class="vol" href="/session-2/"><div class="book" style="--c:var(--s2)"><i></i><small>Session 2</small><b>Connectors</b><span>Your team folder, two skills, a sprint</span></div><p>Your AI reads your team's files.</p></a>
+    <span class="vol soon"><div class="book"><small>Session 3</small><b>Routines</b><span>Soon</span></div></span>
+    <span class="vol soon"><div class="book"><small>Session 4</small><b>Your agent</b><span>Soon</span></div></span>
+  </div>
+  <section class="how"><h2>Keep your work</h2><p>Each workbook saves to this browser, on this device. To move it, use <b>Save a copy</b> in My venture and open the file on the other machine.</p></section>
+  <footer>Made by <a href="https://oliviolabs.com">Olivio Labs</a>. The skills inside belong to their authors; see each workbook's Credits.</footer>
+</main>
+</body>
+</html>
