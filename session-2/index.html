@@ -2837,7 +2837,6 @@ root.addEventListener('click', async e => {
     case 'edit': { const c = S.custom.find(x => x.id === d.id); if (c) { S.draft = Object.assign(blankDraft(), c, { rules: (c.rules || []).slice(), editing: c.id }); save(); location.hash = '#/write'; } break; }
     case 'delete': if (confirm('Delete this skill from the workbook? A copy you already added to ' + app().name + ' stays there.')) { S.custom = S.custom.filter(c => c.id !== d.id); delete S.shelf[d.id]; save(); location.hash = '#/library'; } break;
     case 'clear-draft': S.draft = null; save(); renderView(); break;
-    case 'dl-sample': download(new Blob([sampleRegister()], { type: 'text/html;charset=utf-8' }), 'rehearse-assumption-register-sample.html'); toast('Sample register downloaded. Put it in 01 Discovery.'); break;
     case 'export': download(new Blob([JSON.stringify({ kind: 'venturelab-skill-workbook', v: 1, saved: new Date().toISOString(), state: S }, null, 2)], { type: 'application/json' }), (slug(S.venture.name) || 'venture') + '-skill-workbook.json'); toast('Copy saved to your downloads'); break;
     case 'import': document.getElementById('importFile').click(); break;
     case 'reset': if (confirm('Start again? This removes your venture and your skills from this browser. Save a copy first if you want to keep them.')) { try { localStorage.removeItem(KEY); } catch (_) { /* storage blocked */ } S = fresh(); returning = false; if (location.hash) history.replaceState(null, '', location.pathname + location.search); renderOnb(); } break;
