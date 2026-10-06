@@ -616,6 +616,9 @@ h2 .who{font-size:12px}
 .now.done svg{width:14px;height:14px}
 p.now{margin-top:10px}
 
+.tiles.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:640px){.tiles.three{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -1252,8 +1255,10 @@ function s2Ask() {
     make: vsk() + `Create a folder called "${v}" at the top of my Google Drive, and inside it four folders: ${FOLDERS.map(f => '"' + f + '"').join(', ')}. Create nothing else. When you are done, list the folder.`,
     see: vsk() + `Search ${folderRef()}. List its folders and the files in each, with dates. Use only that folder, nothing else in my Drive.`,
     fill: (vs ? `Use the ${vs} skill. ` : `About ${v}: ${one(S.venture.idea) || '[what it does, who it is for, where, and the stage]'}\n\n`) + `Create two files in ${folderRef()}.\n\n1. In "00 Venture", a file "about-${slug(v) || 'venture'}.md": what ${v} does, for whom, where, the stage, the team, and what we are deciding this month. ${vs ? 'Take it from the ' + vs + ' skill.' : 'Ask me what you do not know, one question at a time.'} Add nothing I did not say.\n\n2. In "01 Discovery", a file "assumption-register.md": a table of the 8 to 12 assumptions that have to be true for ${v} to work, with columns ID, assumption, impact if wrong (high, medium, low), how unsure we are (high, medium, low), evidence so far with its source and date, or "none yet". If I attached pages from last time, take the assumptions and the evidence from them; otherwise use what you know about ${v} and mark every evidence "none yet".\n\nShow me both files before you save them. Create nothing anywhere else.`,
-    rank: withVenture(`Use the prioritize-assumptions skill.\n\nRead the assumption register in ${folderRef()}, folder "01 Discovery". Rank the assumptions by impact and risk, and for each one say: test it, go ahead, defer it or drop it. End with the three to test first, and why.\n\nSave the result as "ranked-assumptions.md" in ${folderRef()}, folder "02 Validation". Show it to me first. Name the file you read, and add no assumptions of your own.`),
-    design: withVenture(`Use the experiment-designer skill.\n\nRead "ranked-assumptions.md" in ${folderRef()}, folder "02 Validation". For each of the three assumptions to test first, design one cheap experiment that measures what people do, not what they say: one main metric, how many people, how long it runs, and a pass mark fixed now, before it starts.\n\nLay it out as a four-week plan, one line per experiment: week, experiment, assumption, metric, pass if, owner. Save it as "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Show it to me first.`),
+    rank: withVenture(`Use the prioritize-assumptions skill.\n\nRead the assumption register in ${folderRef()}, folder "01 Discovery". Rank the assumptions by impact and risk, and for each one say: test it, go ahead, defer it or drop it. End with the three to test first, and why.\n\nSave the result as "${rankFile()}" in ${folderRef()}, folder "02 Validation". Show it to me first. Name the file you read, and add no assumptions of your own.`),
+    design: withVenture(isSolo()
+      ? `Use the experiment-designer skill.\n\nRead "ranked-assumptions.md" in ${folderRef()}, folder "02 Validation". For each of the three assumptions to test first, design one cheap experiment that measures what people do, not what they say: one main metric, how many people, how long it runs, and a pass mark fixed now, before it starts.\n\nLay it out as a four-week plan, one line per experiment: week, experiment, assumption, metric, pass if, owner. Save it as "validation-sprint.md" in ${folderRef()}, folder "02 Validation". Show it to me first.`
+      : `Use the experiment-designer skill.\n\nRead every file in ${folderRef()}, folder "02 Validation", whose name starts with "ranked-assumptions". Name each file you read. If there is more than one, compare them first: where the rankings agree, where they disagree, and which three assumptions to test first once you take all of them into account, with one line on why.\n\nThen, for those three, design one cheap experiment each that measures what people do, not what they say: one main metric, how many people, how long it runs, and a pass mark fixed now, before it starts.\n\nLay it out as a four-week plan, one line per experiment: week, experiment, assumption, metric, pass if, owner. Save it as "validation-sprint.md" in the same folder. Show it to me first.`),
     keep: `This changes what you have on file about ${v}: our riskiest assumption is [the one ranked first] and our validation sprint runs from [date] to [date].${vs ? ` Update the ${vs} skill: show me the old line and the new line first.` : ''}`,
     project: `Read the files in this Project and list them with their dates.`
   };
@@ -1326,68 +1331,78 @@ const logoSvg = c => `<svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><
 const connBook = c => `<div class="book conn" style="--c:${c.c}">${logoSvg(c)}${connDone(c.id, 'on') ? `<span class="got" title="Connected">${ICON.check}</span>` : ''}<div class="t">${esc(c.name)}</div><div class="for">connector</div></div>`;
 const connVol = c => `<a class="vol" href="#/connector/${c.id}">${connBook(c)}<p>${esc(c.tagline)}</p></a>`;
 
-/* ---------- who does what: one teammate owns the Google Drive folder, the others connect to it ---------- */
-const isOwner = () => S.s2.role === 'owner';
-const roleTiles = () => `<div class="tiles" role="group" aria-label="Team folder">
-        <button type="button" class="tile" data-role="owner" aria-pressed="${S.s2.role === 'owner'}"><b>I set up the Google Drive folder</b><span>One person per team.</span></button>
-        <button type="button" class="tile" data-role="member" aria-pressed="${S.s2.role !== 'owner'}"><b>A teammate sets it up</b><span>I connect to it.</span></button>
+/* ---------- who does what: one teammate owns the Google Drive folder, the others connect to it; or one person does it all ---------- */
+const role = () => (S.s2.role === 'owner' || S.s2.role === 'solo' ? S.s2.role : 'member');
+const isOwner = () => role() !== 'member';     /* the owner and the solo founder both own the folder */
+const isSolo = () => role() === 'solo';
+const roleTiles = () => `<div class="tiles three" role="group" aria-label="Team folder">
+        <button type="button" class="tile" data-role="owner" aria-pressed="${role() === 'owner'}"><b>I set up the Google Drive folder</b><span>One person per team.</span></button>
+        <button type="button" class="tile" data-role="member" aria-pressed="${role() === 'member'}"><b>A teammate sets it up</b><span>I connect to it.</span></button>
+        <button type="button" class="tile" data-role="solo" aria-pressed="${role() === 'solo'}"><b>I am on my own</b><span>I do everything.</span></button>
       </div>`;
-const roleLine = () => `<p class="role">${isOwner() ? 'You set up the team folder.' : 'A teammate sets up the team folder.'} <button type="button" class="linkbtn" data-role="${isOwner() ? 'member' : 'owner'}">Change</button></p>`;
+const roleLine = () => `<p class="role">${isSolo() ? 'You are on your own: every step is yours.' : isOwner() ? 'You set up the team folder.' : 'A teammate sets up the team folder.'} <button type="button" class="linkbtn" data-act="role-change">Change</button></p>`;
 /* who: 'owner', 'member' or 'all' */
-const whoPill = who => who === 'all' ? '<span class="who all">Everyone</span>' : (who === 'owner') === isOwner() ? '<span class="who you">You</span>' : '<span class="who">A teammate</span>';
+const mine = who => isSolo() || who === 'all' || (who === 'owner') === isOwner();
+const whoPill = who => isSolo() ? '<span class="who you">You</span>' : who === 'all' ? '<span class="who all">Everyone</span>' : mine(who) ? '<span class="who you">You</span>' : '<span class="who">A teammate</span>';
+const myName = () => slug(one(S.founder)) || 'me';
+const rankFile = () => (isSolo() ? 'ranked-assumptions.md' : `ranked-assumptions-${myName()}.md`);
 
 /* ---------- pages ---------- */
 const s2done = key => !!(S.s2.done || {})[key];
 const s2tick = (key, label) => `<label class="tick"><input type="checkbox" data-s2done="${key}" ${s2done(key) ? 'checked' : ''}><span>${label}</span></label>`;
 const WHEN = ['Do this first', 'Then do this', 'Then do this', 'Then do this', 'Do this last'];
 const skillCard = (id, i) => { const k = findSkill(id); return `<a href="#/skill/${id}"><small>Skill ${i + 1}</small><b>${esc(k.title)}</b><span>${esc(k.tagline)}</span><i>Get the instructions &rarr;</i></a>`; };
-const folderDone = () => s2done('project') || (s2done('connect') && s2done('shared') && s2done('filled') && (isOwner() ? s2done('made') : s2done('seen')));
-const SKILL = () => AGENTS.validation.skills[0];
+const folderDone = () => s2done('project') || (s2done('connect') && s2done('filled') && (isSolo() ? s2done('made') : isOwner() ? s2done('made') && s2done('shared') : s2done('shared') && s2done('seen')));
 
 function s2StartPage() {
-  const a = app().name, v = esc(vname()), chat = S.app === 'chatgpt', ask = s2Ask(), p = S2_APP[S.app], own = isOwner();
+  const a = app().name, v = esc(vname()), chat = S.app === 'chatgpt', ask = s2Ask(), p = S2_APP[S.app], own = isOwner(), solo = isSolo();
   const [k1, k2] = AGENTS.validation.skills.map(findSkill);
   /* [title, what, link, button, done, who, scroll, what to do now (you), what to do now (not you)] */
   const rows = [
-    ['Set up your team folder', own ? `One shared Google Drive folder. ${a} creates it and writes the first files; your teammates connect to it.` : `A teammate has ${a} create the folder. You connect ${a} to it and check you can see it.`, '#/folder', 'Open Team folder', folderDone(), 'all', '',
-      own ? 'Start now: connect Drive, then make the folder.' : 'Start now: connect Drive. Then wait for the share.', ''],
-    ['Rank your assumptions', `Skill 1, ${k1.title}: which assumptions to test first. ${own ? 'A teammate adds it and runs it.' : 'One of you adds it and runs it.'}`, '#/start', 'Go to step 2', s2done('ranked'), 'member', ' data-scroll="rank"',
-      'Start now: add the skill, then send the message.', 'Wait for your teammate. Tick the box when ranked-assumptions.md appears in Drive.'],
-    ['Design the sprint', `Skill 2, ${k2.title}: one experiment per assumption, with a pass mark set before it starts. ${own ? 'You add it and run it.' : 'The folder owner adds it and runs it.'}`, '#/start', 'Go to step 3', s2done('sprint'), 'owner', ' data-scroll="design"',
-      'Start now: add the skill, then send the message.', 'Wait for the folder owner. Tick the box when validation-sprint.md appears in Drive.'],
-    ['Tell your venture skill', 'One message each, so every teammate\'s AI knows about the sprint.', '#/start', 'Go to step 4', s2done('keep'), 'all', ' data-scroll="keep"',
+    ['Set up your team folder', solo ? `One Google Drive folder. ${a} creates it and writes the first files.` : own ? `One shared Google Drive folder. ${a} creates it and writes the first files; your teammates connect to it.` : `A teammate has ${a} create the folder. You connect ${a} to it and check you can see it.`, '#/folder', 'Open Team folder', folderDone(), 'all', '',
+      solo ? 'Start now: connect Drive, then make the folder.' : own ? 'Start now: connect Drive, then make the folder.' : 'Start now: connect Drive. Then wait for the share.', ''],
+    ['Rank your assumptions', `Skill 1, ${k1.title}: which assumptions to test first. ${solo ? 'You add it and run it.' : own ? 'Each teammate adds it and runs it, and saves their own ranking.' : 'Each teammate adds it and runs it, and saves their own ranking.'}`, '#/start', 'Go to step 2', s2done('ranked'), 'member', ' data-scroll="rank"',
+      solo ? 'Start now: add the skill, then send the message.' : 'Start now: add the skill, then send the message. Each of you saves your own file.', 'Wait for your teammates. Tick the box when their ranked-assumptions files are in Drive.'],
+    ['Design the sprint', `Skill 2, ${k2.title}: one experiment per assumption, with a pass mark set before it starts. ${solo ? 'You add it and run it on your ranking.' : own ? 'You add it and run it on every ranking in the folder.' : 'The folder owner adds it and runs it on all your rankings.'}`, '#/start', 'Go to step 3', s2done('sprint'), 'owner', ' data-scroll="design"',
+      solo ? 'Start now: add the skill, then send the message.' : 'Start now, once every teammate\'s ranking is in the folder.', 'Wait for the folder owner. Tick the box when validation-sprint.md appears in Drive.'],
+    ['Tell your venture skill', solo ? 'One message, so your AI knows about the sprint.' : 'One message each, so every teammate\'s AI knows about the sprint.', '#/start', 'Go to step 4', s2done('keep'), 'all', ' data-scroll="keep"',
       'Start now: send the message.', ''],
-    ['Add one connector', `Each of you picks a different one for ${v}.`, '#/library', 'Open the Library', CONNECTORS.some(c => c.id !== 'google-drive' && connDone(c.id, 'on')), 'all', ' data-scroll="connectors"',
-      'Start now: pick one your teammates did not.', '']
+    ['Add one connector', solo ? `Pick the one that fits ${v}.` : `Each of you picks a different one for ${v}.`, '#/library', 'Open the Library', CONNECTORS.some(c => c.id !== 'google-drive' && connDone(c.id, 'on')), 'all', ' data-scroll="connectors"',
+      solo ? 'Start now: pick one.' : 'Start now: pick one your teammates did not.', '']
   ];
   const next = rows.findIndex(r => !r[4]);
-  const mine = who => who === 'all' || (who === 'owner') === own;
   const nowLine = (r, i) => {
     if (r[4]) return `<span class="now done">${ICON.check} Done</span>`;
     if (i !== next) return `<span class="now later">Not yet. After step ${i}.</span>`;
     return mine(r[5]) ? `<span class="now go">${r[7]}</span>` : `<span class="now wait">${r[8]}</span>`;
   };
   const newChat = `Start a new chat${chat ? ' and select <kbd class="ui">Work</kbd>' : ''}${s2done('project') ? ', inside your Project' : ''}`;
-  const skillStep = (k, n, msgKey, msg, who, file, expect) => `<section class="sec" id="${msgKey === 'rank' ? 'rank' : 'design'}"><h2>Step ${n}: ${msgKey === 'rank' ? 'Rank your assumptions' : 'Design the sprint'} ${whoPill(who)}</h2>
-      <p class="now ${(who === 'owner') === own ? 'go' : 'wait'}" style="margin-top:10px">${(who === 'owner') === own ? `You do this step. Start once ${n === 2 ? 'assumption-register.md' : 'ranked-assumptions.md'} is in the folder.` : `A teammate does this step. You wait, and tick the box when ${file} appears in Drive. You may add the skill too.`}</p>
+  const skillStep = (k, n, msgKey, msg, who, file, expect, lead) => `<section class="sec" id="${msgKey === 'rank' ? 'rank' : 'design'}"><h2>Step ${n}: ${msgKey === 'rank' ? 'Rank your assumptions' : 'Design the sprint'} ${whoPill(who)}</h2>
+      <p class="now ${mine(who) ? 'go' : 'wait'}" style="margin-top:10px">${lead}</p>
       <div class="todayskills two">${skillCard(k.id, n - 2)}</div>
       <p><b>Do this first:</b> open the skill above and follow its page: get it, add it to ${a}, run it, check it.</p>
       <p><b>Then:</b> ${newChat.replace('Start', 'start')}. Send:</p>
       ${copyBox(msgKey, msg)}
-      <p class="expect"><b>It should:</b> ${expect} It shows it to you first: reply "Save it." Then it saves ${file} in 02 Validation${chat ? '' : ' (select Allow once when Claude asks)'}. Everyone: open Drive and read it.</p>
+      <p class="expect"><b>It should:</b> ${expect} It shows it to you first: reply "Save it." Then it saves ${file} in 02 Validation${chat ? '' : ' (select Allow once when Claude asks)'}. ${solo ? 'Open Drive and read it.' : 'Everyone: open Drive and read it.'}</p>
       ${s2tick(msgKey === 'rank' ? 'ranked' : 'sprint', file + ' is in our folder')}
     </section>`;
+  const rankLead = solo ? 'You do this step. Start once assumption-register.md is in the folder.'
+    : mine('member') ? `You do this step, and so does every other teammate who is not the folder owner. Start once assumption-register.md is in the folder. Your file is called ${esc(rankFile())}.`
+    : 'Your teammates do this step, each one on their own laptop. You wait, and tick the box when their ranked-assumptions files appear in Drive. You may add the skill too.';
+  const designLead = solo ? 'You do this step. Start once your ranking is in the folder.'
+    : own ? 'You do this step. Start once every teammate\'s ranked-assumptions file is in the folder: ask them.'
+    : 'The folder owner does this step. You wait, and tick the box when validation-sprint.md appears in Drive. You may add the skill too.';
   return `<header class="head">
       <p class="tagline">Session 2 of 4 · Connectors</p>
       <h1>Let ${a} read ${v}'s files.</h1>
-      <p class="lede">Five steps, in this order. Finish one before you start the next. Each step says who does it.</p>
+      <p class="lede">Five steps, in this order. Finish one before you start the next. ${solo ? 'Every step is yours.' : 'Each step says who does it.'}</p>
       ${roleLine()}
     </header>
     <ol class="path">${rows.map((r, i) => `<li class="${r[4] ? 'done' : ''}"><span class="n">${r[4] ? ICON.check : i + 1}</span><div><em class="when">${WHEN[i]}</em><b>${r[0]} ${whoPill(r[5])}</b><span>${r[1]}</span>${nowLine(r, i)}</div><a class="btn ${next === i ? 'primary' : 'line'} small" href="${r[2]}"${r[6] || ''}>${r[3]}</a></li>`).join('')}</ol>
-    ${skillStep(k1, 2, 'rank', ask.rank, 'member', 'ranked-assumptions.md', 'name the register file, rank every assumption, and end with the three to test first.')}
-    ${skillStep(k2, 3, 'design', ask.design, 'owner', 'validation-sprint.md', 'show three experiments that measure what people do, each with one metric, a number of people, a run time and a pass mark, laid out week by week.')}
+    ${skillStep(k1, 2, 'rank', ask.rank, 'member', rankFile(), 'name the register file, rank every assumption, and end with the three to test first.', rankLead)}
+    ${skillStep(k2, 3, 'design', ask.design, 'owner', 'validation-sprint.md', (solo ? 'read your ranking' : 'name every ranked-assumptions file it found and, if there are several, say where they agree and disagree before choosing') + ', then show three experiments that measure what people do, each with one metric, a number of people, a run time and a pass mark, laid out week by week.', designLead)}
     <section class="sec" id="keep"><h2>Step 4: Tell your venture skill ${whoPill('all')}</h2>
-      <p class="now go" style="margin-top:10px">Everyone does this, once validation-sprint.md is in the folder.</p>
+      <p class="now go" style="margin-top:10px">${solo ? 'Do this once validation-sprint.md is in the folder.' : 'Everyone does this, once validation-sprint.md is in the folder.'}</p>
       <p>In a new chat, send:</p>
       ${copyBox('keep', ask.keep)}
       <p class="expect"><b>It should:</b> ${S.vskill ? `show the old line and the new line, then give you a new version of the ${esc(S.vskill)} skill to save.` : 'keep it for this chat. To make it last, set up your venture skill in <a href="#/venture">My venture</a>.'}</p>
@@ -1398,39 +1413,39 @@ function s2StartPage() {
 }
 
 function folderPage() {
-  const v = esc(vname()), a = app().name, p = S2_APP[S.app], ask = s2Ask(), chat = S.app === 'chatgpt', own = isOwner();
+  const v = esc(vname()), a = app().name, p = S2_APP[S.app], ask = s2Ask(), chat = S.app === 'chatgpt', own = isOwner(), solo = isSolo();
   const step = (n, key, title, body) => `<li class="${s2done(key) ? 'done' : ''}"><span class="n">${s2done(key) ? ICON.check : n}</span><div><h2>${title}</h2>${body}</div></li>`;
   const yes = chat ? '' : ' Say yes when Claude asks.';
   const connect = n => step(n, 'connect', `Connect ${a} to Google Drive`, `
+        ${solo ? '' : '<p>Everyone does this, on their own account.</p>'}
         ${clicks(p.connect)}
         <ol class="mini">${p.link.map(x => `<li>${ui(x)}</li>`).join('')}</ol>
         <p class="fine">${ui(p.missing)}</p>
         ${s2tick('connect', 'Connected')}`);
+  const make = n => step(n, 'made', `${a} creates the folder`, `
+        <p>Start a new chat${chat ? ' and select <kbd class="ui">Work</kbd>' : ''}. Send:</p>
+        ${copyBox('make', ask.make)}
+        <p class="expect"><b>It should:</b> create the folder with four folders inside and list them.${yes} Open Drive and check.</p>
+        ${s2tick('made', 'The folder is in Drive')}`);
+  const share = n => step(n, 'shared', 'Share it with your team', `
+        <ol class="mini">
+          <li>${ui('In Drive, right-click the ' + vname() + ' folder, select [[Share]], type your teammates\' emails, choose [[Editor]], select [[Send]].')}</li>
+        </ol>
+        <p class="fine">Sharing blocked by your organisation? Use personal Google accounts.</p>
+        ${s2tick('shared', 'Shared with everyone')}`);
+  const fill = n => step(n, 'filled', `${a} writes the first files`, `
+        <p>In the same chat, send this. If you still have pages from last time, attach them first with the <kbd class="ui">+</kbd> button; if not, ${a} works from what it knows.</p>
+        ${copyBox('fill', ask.fill)}
+        <p class="expect"><b>It should:</b> show you an about file and an assumption register and ask before saving: reply "Save them." Then it saves them in 00 Venture and 01 Discovery.${yes} Read the register: it is what the skill works on next.</p>
+        ${s2tick('filled', 'The about file and the register are in the folder')}`);
   const see = (n, what) => step(n, 'seen', 'Check you can see it', `
         <p>In a new chat${chat ? ' in <kbd class="ui">Work</kbd>' : ''}, send:</p>
         ${copyBox('see', ask.see)}
         <p class="expect"><b>It should:</b> list ${what}. ${ui(p.find)}</p>
         ${s2tick('seen', 'It listed our folder')}`);
-  const steps = own ? [
-    connect(1),
-    step(2, 'made', `${a} creates the folder`, `
-        <p>Start a new chat${chat ? ' and select <kbd class="ui">Work</kbd>' : ''}. Send:</p>
-        ${copyBox('make', ask.make)}
-        <p class="expect"><b>It should:</b> create the folder with four folders inside and list them.${yes} Open Drive and check.</p>
-        ${s2tick('made', 'The folder is in Drive')}`),
-    step(3, 'shared', 'Share it with your team', `
-        <ol class="mini">
-          <li>${ui('In Drive, right-click the ' + vname() + ' folder, select [[Share]], type your teammates\' emails, choose [[Editor]], select [[Send]].')}</li>
-        </ol>
-        <p class="fine">Sharing blocked by your organisation? Use personal Google accounts.</p>
-        ${s2tick('shared', 'Shared with everyone')}`),
-    step(4, 'filled', `${a} writes the first files`, `
-        <p>In the same chat, send this. If you still have pages from last time, attach them first with the <kbd class="ui">+</kbd> button; if not, ${a} works from what it knows.</p>
-        ${copyBox('fill', ask.fill)}
-        <p class="expect"><b>It should:</b> show you an about file and an assumption register and ask before saving: reply "Save them." Then it saves them in 00 Venture and 01 Discovery.${yes} Read the register: it is what the skill works on next.</p>
-        ${s2tick('filled', 'The about file and the register are in the folder')}`),
-    see(5, 'the four folders and the two files')
-  ] : [
+  const steps = solo ? [connect(1), make(2), fill(3), see(4, 'the four folders and the two files')]
+    : own ? [connect(1), make(2), share(3), fill(4), see(5, 'the four folders and the two files')]
+    : [
     connect(1),
     step(2, 'shared', 'Accept the share', `
         <p class="now wait">Wait for the teammate who sets up the folder to share it with you. Then:</p>
@@ -1448,8 +1463,8 @@ function folderPage() {
   return `<a class="back" href="#/start">${ICON.back}Start</a>
     <header class="head">
       <p class="tagline">Step 1 of 5</p>
-      <h1>Your team folder.</h1>
-      <p class="lede">${own ? `One Google Drive folder for ${v}. ${a} creates it, writes the files in it, and reads it from now on. You share it with the team.` : `One Google Drive folder for ${v}, set up by a teammate. You connect ${a} to it, so it reads the same files as everyone else.`}</p>
+      <h1>Your ${solo ? '' : 'team '}folder.</h1>
+      <p class="lede">${solo ? `One Google Drive folder for ${v}. ${a} creates it, writes the files in it, and reads it from now on.` : own ? `One Google Drive folder for ${v}. ${a} creates it, writes the files in it, and reads it from now on. You share it with the team.` : `One Google Drive folder for ${v}, set up by a teammate. You connect ${a} to it, so it reads the same files as everyone else.`}</p>
       ${roleLine()}
     </header>
     <ol class="do">${steps.join('')}</ol>
@@ -2142,6 +2157,9 @@ function onbHTML() {
       </div>
       <label class="small">Pick a cover</label>${swatches()}
       <label class="small" style="margin-top:22px">Your team folder</label>${roleTiles()}
+      <label class="small" style="margin-top:22px" for="f-founder">Your first name</label>
+      <input class="big" id="f-founder" data-s="founder" value="${esc(S.founder)}" placeholder="First name" autocomplete="off" maxlength="40" style="font-size:20px">
+      <p class="fine">Used to name the file you save in the team folder.</p>
       <label class="small" style="margin-top:22px">Did you set up your venture skill yesterday?</label>${yesterdayTiles()}
       ${didS1() === 'yes' ? `<label class="small" style="margin-top:22px" for="f-name">Your venture</label>
       ${S.fromS1 ? '<p class="fine" style="margin:0 0 6px">Found in yesterday\'s workbook. Change it if it is wrong.</p>' : ''}
@@ -2782,6 +2800,7 @@ root.addEventListener('click', async e => {
   if (d.stage) { S.venture.stage = S.venture.stage === d.stage && S.onboarded ? '' : d.stage; save(); root.querySelectorAll('[data-stage]').forEach(b => b.setAttribute('aria-pressed', b.dataset.stage === S.venture.stage)); return; }
   if (d.did) { S.s2.didS1 = d.did; save(); renderOnb(false); return; }
   if (d.role) { S.s2.role = d.role; save(); if (S.onboarded) renderView(true); else root.querySelectorAll('[data-role]').forEach(b => b.setAttribute('aria-pressed', b.dataset.role === S.s2.role)); return; }
+  if (d.act === 'role-change') { S.s2.role = { owner: 'member', member: 'solo', solo: 'owner' }[role()]; save(); renderView(true); return; }
   if (d.app) { S.app = d.app; save(); if (S.onboarded) renderView(true); else root.querySelectorAll('[data-app]').forEach(b => b.setAttribute('aria-pressed', b.dataset.app === S.app)); return; }
   if (d.go) { location.hash = d.go; return; }
   if (d.route) { S.route = d.route; save(); renderView(true); return; }
