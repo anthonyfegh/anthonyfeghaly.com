@@ -1082,7 +1082,7 @@ const RULE_CHIPS = [
    Labels in [[double brackets]] are printed as on-screen buttons, exactly as each vendor's
    help pages write them. Checked against those pages on the date below; re-check from time to time. */
 
-const MANUAL_CHECKED = '3 October 2026';
+const MANUAL_CHECKED = '6 October 2026';
 
 const MANUAL = {
   chatgpt: {
@@ -1169,14 +1169,14 @@ const MANUAL = {
     },
     chat: {
       time: 'about one minute',
-      path: ['Customize', 'Skills', 'skill-creator', 'Turn on'],
+      path: ['Customize', 'Skills', 'Yours', 'skill-creator'],
       steps: [
-        ['In Claude, select [[Customize]], then [[Skills]]. Find [[skill-creator]] (from Anthropic) and select [[Turn on]]. You only do this once.'],
+        ['In Claude, select [[Customize]], then [[Skills]], and look for [[skill-creator]] (from Anthropic) under [[Yours]]. If it is not there, select [[Discover]], search for skill-creator and select [[Add]]. You only do this once.'],
         ['In this workbook, open a skill and select [[Copy the build prompt]].'],
         ['Start a new chat in Claude, paste the prompt and send it. If Claude asks a question, answer it.'],
         ['Claude shows a card for the finished skill. Select [[Save skill]].',
          'If there is no Save skill button, download the file Claude gives you and add it with "Upload the file" above.'],
-        ['Open [[Customize]], then [[Skills]], and check that the skill is listed under [[Created by you]] and switched on.']
+        ['Open [[Customize]], then [[Skills]], and check that the skill is listed under [[Yours]].']
       ]
     },
     use: [
@@ -1189,7 +1189,7 @@ const MANUAL = {
     change: [
       ['To change a skill, say so in a chat: "Use the skill-creator skill to update my market-sizing skill so that it always answers in Spanish." Then select [[Save skill]]. Saving under the same name offers to update the existing skill.'],
       ['To change a skill you wrote in this workbook, edit it here, download it again and upload the new file.'],
-      ['To remove a skill, open it under [[Customize]], [[Skills]], select [[...]] next to its switch, then [[Delete]].']
+      ['To remove a skill, open it under [[Customize]], [[Skills]], select [[...]] next to its switch, then [[Remove]].']
     ],
     faq: [
       ['I cannot find Skills, or the upload fails straight away.', 'Open Settings, then Capabilities, and turn on "Code execution and file creation". Then reload the page.'],
@@ -1374,7 +1374,7 @@ function s2StartPage() {
       <p><b>Do this first:</b> open the skill above and follow its page: get it, add it to ${a}, run it, check it.</p>
       <p><b>Then:</b> ${newChat.replace('Start', 'start')}. Send:</p>
       ${copyBox(msgKey, msg)}
-      <p class="expect"><b>It should:</b> ${expect} Then it saves ${file} in 02 Validation${chat ? '' : ' after you say yes'}. Everyone: open Drive and read it.</p>
+      <p class="expect"><b>It should:</b> ${expect} It shows it to you first: reply "Save it." Then it saves ${file} in 02 Validation${chat ? '' : ' (select Allow once when Claude asks)'}. Everyone: open Drive and read it.</p>
       ${s2tick(msgKey === 'rank' ? 'ranked' : 'sprint', file + ' is in our folder')}
     </section>`;
   return `<header class="head">
@@ -1427,7 +1427,7 @@ function folderPage() {
     step(4, 'filled', `${a} writes the first files`, `
         <p>In the same chat, send this. If you still have pages from last time, attach them first with the <kbd class="ui">+</kbd> button; if not, ${a} works from what it knows.</p>
         ${copyBox('fill', ask.fill)}
-        <p class="expect"><b>It should:</b> show you an about file and an assumption register, then save them in 00 Venture and 01 Discovery.${yes} Read the register: it is what the skill works on next.</p>
+        <p class="expect"><b>It should:</b> show you an about file and an assumption register and ask before saving: reply "Save them." Then it saves them in 00 Venture and 01 Discovery.${yes} Read the register: it is what the skill works on next.</p>
         ${s2tick('filled', 'The about file and the register are in the folder')}`),
     see(5, 'the four folders and the two files')
   ] : [
@@ -2116,14 +2116,14 @@ function gotHTML() {
 }
 /* How to run the prompt in each app. Claude's labels are as seen on 4 October 2026. */
 const onboardHow = () => S.app === 'claude'
-  ? ['In Claude, select [[Customize]], then [[Skills]], and turn on [[skill-creator]]. You do this once.',
+  ? ['In Claude, select [[Customize]], then [[Skills]]. Look for [[skill-creator]] under [[Yours]]; if it is not there, select [[Discover]], search for it and select [[Add]]. You do this once.',
      'Start a new chat, paste the prompt and send it.',
      'It lists what it already knows about your venture, then asks you up to eight questions, one at a time.',
      'When the skill card appears, select [[Save skill]].']
   : ['Open ChatGPT in your browser and start a new chat. Select [[Work]] at the top.',
      'Paste the prompt and send it.',
      'It lists what it already knows about your venture, then asks you up to eight questions, one at a time.',
-     'When the skill is ready, select [[Install]].'];
+     'Wait until ChatGPT says the skill is saved: it is then installed.'];
 /* One screen if the venture skill was made yesterday; otherwise the set-up prompt and the four lines come back */
 const didS1 = () => S.s2.didS1 || (S.fromS1 ? 'yes' : '');
 const onbSteps = () => (didS1() === 'no' ? 3 : 1);
@@ -2613,7 +2613,7 @@ function manualPage() {
          'These two lines are all your AI reads until it decides to use the skill. Published skills spend about ' + FIELD.descMedian + ' characters on the description, and ' + FIELD.sayWhen + ' in 100 say when to use the skill.'],
         ['Below that come the instructions, in ordinary sentences under headings. The parts you will meet most often: what to ask for, numbered steps, a template for the result, quality checks, and what not to do.',
          'Keep SKILL.md under about 500 lines. ' + FIELD.under500 + ' in 100 published skills do.'],
-        ['Longer material goes in folders next to SKILL.md: references for background, assets or templates for files to fill in, scripts for code. Your AI opens them only when SKILL.md points to them. In the library, Executive Summary and Cold Email work this way.',
+        ['Longer material goes in folders next to SKILL.md: references for background, assets or templates for files to fill in, scripts for code. Your AI opens them only when SKILL.md points to them.',
          FIELD.references + ' in 100 published skills carry a references folder. ' + FIELD.single + ' in 100 are a single file.'],
         ['Some authors add other lines at the top, such as a version or a license. Only name and description are required, and an app can reject a line it does not know. When you write your own, keep to the two.'],
         ['Some skills contain $ARGUMENTS. It stands for whatever you typed after the skill\'s name. In a chat it simply means "the thing the user asked about".'],
@@ -2673,7 +2673,7 @@ function venturePage() {
       <div><label for="v-idea">What it does, in one line</label><textarea class="area" id="v-idea" data-v="idea" rows="2" maxlength="280">${esc(v.idea)}</textarea></div>
     </div>`}
     <section class="sec"><h2>This workbook</h2>
-      <p>The stage decides which skills the workbook suggests first. The cover is yours.</p>
+      <p>The cover is yours.</p>
       <div class="form" style="margin-top:14px">
         <div><label>Stage</label>${stageTiles().replace('class="tiles"', 'class="tiles" style="margin-top:0"')}</div>
         <div><label>Cover</label>${swatches().replace('class="swatches"', 'class="swatches" style="margin-top:6px"')}</div>
