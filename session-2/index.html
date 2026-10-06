@@ -1377,13 +1377,13 @@ function s2StartPage() {
     return mine(r[5]) ? `<span class="now go">${r[7]}</span>` : `<span class="now wait">${r[8]}</span>`;
   };
   const newChat = `Start a new chat${chat ? ' and select <kbd class="ui">Work</kbd>' : ''}${s2done('project') ? ', inside your Project' : ''}`;
-  const skillStep = (k, n, msgKey, msg, who, file, expect, lead) => `<section class="sec" id="${msgKey === 'rank' ? 'rank' : 'design'}"><h2>Step ${n}: ${msgKey === 'rank' ? 'Rank your assumptions' : 'Design the sprint'} ${whoPill(who)}</h2>
+  const skillStep = (k, n, msgKey, msg, who, file, expect, lead, after) => `<section class="sec" id="${msgKey === 'rank' ? 'rank' : 'design'}"><h2>Step ${n}: ${msgKey === 'rank' ? 'Rank your assumptions' : 'Design the sprint'} ${whoPill(who)}</h2>
       <p class="now ${mine(who) ? 'go' : 'wait'}" style="margin-top:10px">${lead}</p>
       <div class="todayskills two">${skillCard(k.id, n - 2)}</div>
       <p><b>Do this first:</b> open the skill above and follow its page: get it, add it to ${a}, run it, check it.</p>
       <p><b>Then:</b> ${newChat.replace('Start', 'start')}. Send:</p>
       ${copyBox(msgKey, msg)}
-      <p class="expect"><b>It should:</b> ${expect} It shows it to you first: reply "Save it." Then it saves ${file} in 02 Validation${chat ? '' : ' (select Allow once when Claude asks)'}. ${solo ? 'Open Drive and read it.' : 'Everyone: open Drive and read it.'}</p>
+      <p class="expect"><b>It should:</b> ${expect} It shows it to you first: reply "Save it." Then it saves ${file} in 02 Validation${chat ? '' : ' (select Allow once when Claude asks)'}. ${solo ? 'Open Drive and read it.' : 'Everyone: open Drive and read it.'}${after || ''}</p>
       ${s2tick(msgKey === 'rank' ? 'ranked' : 'sprint', file + (msgKey === 'rank' ? '' : ' and validation-sprint.html are') + (msgKey === 'rank' ? ' is' : '') + ' in our folder')}
     </section>`;
   const rankLead = solo ? 'You do this step. Start once assumption-register.md is in the folder.'
@@ -1400,7 +1400,7 @@ function s2StartPage() {
     </header>
     <ol class="path">${rows.map((r, i) => `<li class="${r[4] ? 'done' : ''}"><span class="n">${r[4] ? ICON.check : i + 1}</span><div><em class="when">${WHEN[i]}</em><b>${r[0]} ${whoPill(r[5])}</b><span>${r[1]}</span>${nowLine(r, i)}</div><a class="btn ${next === i ? 'primary' : 'line'} small" href="${r[2]}"${r[6] || ''}>${r[3]}</a></li>`).join('')}</ol>
     ${skillStep(k1, 2, 'rank', ask.rank, 'member', rankFile(), 'name the register file, rank every assumption, and end with the three to test first.', rankLead)}
-    ${skillStep(k2, 3, 'design', ask.design, 'owner', 'validation-sprint.md', (solo ? 'read your ranking' : 'name every ranked-assumptions file it found and, if there are several, say where they agree and disagree before choosing') + ', then show three experiments that measure what people do, each with one metric, a number of people, a run time and a pass mark, laid out week by week. After the file is saved it builds the same plan as a web page, validation-sprint.html, saves it next to it and hands it to you to open in your browser.', designLead)}
+    ${skillStep(k2, 3, 'design', ask.design, 'owner', 'validation-sprint.md', (solo ? 'read your ranking' : 'name every ranked-assumptions file it found and, if there are several, say where they agree and disagree before choosing') + ', then show three experiments that measure what people do, each with one metric, a number of people, a run time and a pass mark, laid out week by week.', designLead, ' Then it builds the same plan as a web page, validation-sprint.html, saves it next to it and hands you the file: open it in your browser.')}
     <section class="sec" id="keep"><h2>Step 4: Tell your venture skill ${whoPill('all')}</h2>
       <p class="now go" style="margin-top:10px">${solo ? 'Do this once validation-sprint.md is in the folder.' : 'Everyone does this, once validation-sprint.md is in the folder.'}</p>
       <p>In a new chat, send:</p>
