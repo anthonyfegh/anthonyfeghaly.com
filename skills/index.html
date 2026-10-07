@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Routines</title>
+<title>Skill library</title>
 <meta name="robots" content="noindex">
 <style>
-:root{--ink:#161A2E;--ink2:#4A5167;--ink3:#7C8399;--navy:#1E2A63;--rule:#DDE0EA;--c:#0B6477}
+:root{--ink:#161A2E;--ink2:#4A5167;--ink3:#7C8399;--navy:#1E2A63;--rule:#DDE0EA;--c:#1E2A63}
 *{box-sizing:border-box}html{background:#EEF0F6 radial-gradient(#D6DAE8 1.2px,transparent 1.6px) 0 0/28px 28px}
 body{margin:0;color:var(--ink);font:18px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 main{max-width:560px;margin:0 auto;padding:56px 22px 64px}
@@ -32,31 +32,16 @@ ol b{font-size:20px;font-weight:700;color:var(--c)}
 .ipad span{display:block;font-size:15px;color:var(--ink2);margin-top:4px}
 </style></head><body><main>
 <a class="back" href="/">&larr; All workbooks</a>
-<p class="kicker">AI for Founders · Session 3</p>
-<h1>Routines</h1>
-<p class="lead">A skill on a clock. Your venture keeps working while you don't, and emails you the result.</p>
-<a class="get" href="workbook.bin" download="WorkbookRoutines.html"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5v21M11 18l9 9 9-9M6 29v6h28v-6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>Download the workbook</a>
-<p class="meta">WorkbookRoutines.html, 500 KB</p>
-<a class="ipad" href="/session-3/ipad/"><b>On an iPad or a phone? Open the workbook here instead &rarr;</b><span>It runs in Safari and remembers your venture there. Add it to your Home Screen to keep it.</span></a>
+<p class="kicker">AI for Founders · Extra</p>
+<h1>Skill library</h1>
+<p class="lead">A hundred real published skills for founders, in one page: read them, download the ones you want, add them to ChatGPT or Claude.</p>
+<a class="get" href="library.bin" download="SkillLibrary.html"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5v21M11 18l9 9 9-9M6 29v6h28v-6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>Download the library</a>
+<p class="meta">SkillLibrary.html, 1796 KB</p>
+<a class="ipad" href="/skills/open/"><b>Or open it here, in the browser &rarr;</b><span>Works on an iPad or a phone too.</span></a>
 <ol>
-<li><b>1</b><span>Press Download.</span></li>
-<li><b>2</b><span>Open the file from your Downloads folder, in Chrome, Edge or Safari.</span></li>
-<li><b>3</b><span>Keep it open beside ChatGPT or Claude. It saves your answers on your computer.</span></li>
+<li><b>1</b><span>Press Download, or open it here.</span></li>
+<li><b>2</b><span>Find a skill, read it, download it as a zip.</span></li>
+<li><b>3</b><span>Add the zip to ChatGPT or Claude the way the workbooks show.</span></li>
 </ol>
-<section class="try">
-<h2>Try this in your AI</h2>
-<p>With your calendar and your inbox connected, paste this in a new chat.</p>
-<pre id="p1">Look at my connected calendar and inbox and propose three recurring tasks worth adding to the ones I already run: what each would do, when it would run, and what I’d stop doing by hand. Then run a sample of your best suggestion right now so I can see real output, and set up only the ones I approve.</pre>
-<button type="button" id="copy1">Copy</button>
-</section>
-<p class="fine"><a href="/skills/">Extra: the skill library</a>, a hundred real skills in one page.</p>
-<p class="fine">The workbook runs on your computer, not on this website: that is where it keeps your venture and your progress.</p>
-</main><script>
-document.getElementById('copy1').addEventListener('click', function () {
-  var t = document.getElementById('p1').textContent, b = this;
-  function done(ok) { b.textContent = ok ? 'Copied' : 'Select the text and copy it'; setTimeout(function () { b.textContent = 'Copy'; }, 1800); }
-  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); });
-  else done(false);
-});
-</script>
-</body></html>
+<p class="fine">Every skill belongs to its author and is included word for word, with its license. See the Credits in the library.</p>
+</main></body></html>
