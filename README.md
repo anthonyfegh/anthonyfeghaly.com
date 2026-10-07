@@ -8,3 +8,5 @@ student's computer: that is where it keeps the venture and the progress.
 
 Update a workbook: copy the new build over `session-N/workbook.bin`, fix the size in `session-N/index.html` if it
 changed a lot, commit, push. Pages rebuilds in about a minute.
+
+- `session-3/`: the routines workbook (7 Oct 2026), downloads as WorkbookRoutines.html.
