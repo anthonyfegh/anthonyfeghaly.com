@@ -21,6 +21,12 @@ ol li{display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:baseline;p
 ol li+li{border-top:1px solid var(--rule)}
 ol b{font-size:20px;font-weight:700;color:var(--c)}
 .fine{font-size:15px;color:var(--ink2)}
+.try{margin:0 0 30px;background:#fff;border:1px solid var(--rule);border-radius:16px;padding:18px 20px 20px}
+.try h2{font-size:17px;margin:0 0 4px}
+.try p{margin:0 0 12px;font-size:15px;color:var(--ink2)}
+.try pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.55 ui-monospace,Menlo,monospace;background:#F4F5FA;border-radius:10px;padding:14px 16px;user-select:all;cursor:text}
+.try button{margin-top:12px;width:100%;padding:14px 18px;border:0;border-radius:999px;background:var(--c);color:#fff;font:700 17px/1 inherit;font-family:inherit;cursor:pointer}
+.try button:active{transform:translateY(1px)}
 </style></head><body><main>
 <a class="back" href="/">&larr; All workbooks</a>
 <p class="kicker">AI for Founders · Session 3</p>
@@ -33,5 +39,19 @@ ol b{font-size:20px;font-weight:700;color:var(--c)}
 <li><b>2</b><span>Open the file from your Downloads folder, in Chrome, Edge or Safari.</span></li>
 <li><b>3</b><span>Keep it open beside ChatGPT or Claude. It saves your answers on your computer.</span></li>
 </ol>
+<section class="try">
+<h2>Try this in your AI</h2>
+<p>With your calendar and your inbox connected, paste this in a new chat.</p>
+<pre id="p1">Look at my connected calendar and inbox and propose three recurring tasks worth adding to the ones I already run: what each would do, when it would run, and what I’d stop doing by hand. Then run a sample of your best suggestion right now so I can see real output, and set up only the ones I approve.</pre>
+<button type="button" id="copy1">Copy</button>
+</section>
 <p class="fine">The workbook runs on your computer, not on this website: that is where it keeps your venture and your progress.</p>
-</main></body></html>
+</main><script>
+document.getElementById('copy1').addEventListener('click', function () {
+  var t = document.getElementById('p1').textContent, b = this;
+  function done(ok) { b.textContent = ok ? 'Copied' : 'Select the text and copy it'; setTimeout(function () { b.textContent = 'Copy'; }, 1800); }
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); });
+  else done(false);
+});
+</script>
+</body></html>
