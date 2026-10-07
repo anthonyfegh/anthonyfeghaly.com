@@ -1283,8 +1283,9 @@ const LIBRARY_ALL = [
   }
 ];
 
-/* Session 3: the nine routine skills, in the library's order */
-const ROUTINE_IDS = ['pm-weekly-review', 'competitive-intelligence-monitor', 'interview-synthesis', 'meeting-prep-pack', 'followup-sweep', 'content-calendar', 'investor-update', 'runway-planner', 'weekly-review'];
+/* Session 3: the eight routine skills, in the library's order */
+/* weekly-review (Craig Hewitt) stays in LIBRARY_ALL but is not a routine: it is written as a live conversation (dropped 7 Oct 2026) */
+const ROUTINE_IDS = ['pm-weekly-review', 'competitive-intelligence-monitor', 'interview-synthesis', 'meeting-prep-pack', 'followup-sweep', 'content-calendar', 'investor-update', 'runway-planner'];
 const GROUPS = GROUPS_ALL.filter(g => g.id === 'routine');
 const LIBRARY = ROUTINE_IDS.map(id => Object.assign(LIBRARY_ALL.find(k => k.id === id), { group: 'routine' }));
 const BY_STAGE = {
@@ -1497,6 +1498,7 @@ const MANUAL = {
 };
 
 /* Session 3: routines. A skill, a clock, and whatever the founder already has: a team folder, a venture skill, or neither.
+   Eight routine skills: weekly-review (Craig Hewitt) was dropped on 7 Oct 2026 because it is written as a live conversation and cannot run unattended.
    Loaded before app.js; uses its helpers (esc, ui, clicks, copyBox, ICON, ...) at render time. LOGOS comes from build.py. */
 
 /* Click paths seen in each app. ChatGPT: Help Center, 7 October 2026 ("Scheduled" page, Settings › Notifications).
@@ -1524,7 +1526,7 @@ const S3_APP = {
       path: ['Plugins', 'Gmail', 'Install plugin'],
       steps: ['Select [[Plugins]] in the left rail, then [[Gmail]], then [[Install plugin]].',
         'Choose your Google account and allow what it asks.',
-        'Then your name at the bottom of the left rail, [[Settings]], [[Notifications]]: turn on [[Email]] for scheduled tasks. If a send ever waits for your approval, the reply still reaches you.'],
+        'Then your name at the bottom of the left rail, [[Settings]], [[Notifications]]. Next to [[Tasks]], choose [[Email]]. If a send ever waits for your approval, the reply still reaches you.'],
       note: 'The routine writes the email itself, from your Gmail, to every address you list: your teammates get it too. ChatGPT may ask you to approve the first send: open the run under Scheduled and approve it once.'
     },
     runNow: ['Send this in the same chat, right after the schedule is confirmed:'],
@@ -1544,8 +1546,8 @@ const S3_APP = {
     schedule: {
       path: ['Scheduled', 'New task', 'Set up manually'],
       steps: ['Select [[Scheduled]] in the sidebar, then [[New task]], then [[Set up manually]].',
-        'Name it after the routine. In the prompt, paste the task below.',
-        'Approval mode: [[Automatically approve]]. Nobody is there to approve at run time.',
+        'Name it after the routine. Paste the task below into [[Instructions]].',
+        'Permissions: [[Auto]]. Nobody is there to approve at run time. Never choose [[Skip all approvals]].',
         'Frequency: [[Weekly]], then the day and the time. Select [[Save]].',
         'Or just paste the task into a new chat with the day and time: Claude proposes the task, you select [[Schedule]].'],
       limit: 'Scheduled tasks run in the cloud: your computer can be off. They need a paid plan.'
@@ -1554,7 +1556,7 @@ const S3_APP = {
       path: ['Customize', 'Connectors', 'Gmail', 'Connect'],
       steps: ['Select [[Customize]] in the sidebar, then [[Connectors]]. Find [[Gmail]] and select [[Connect]].',
         'Choose your Google account and allow access.',
-        'Claude asks before every email it sends. In a routine set to Automatically approve, it sends the one email the task names and nothing else.'],
+        'Claude asks before every email it sends. In a routine with Permissions set to Auto, it sends the one email the task names without asking, and nothing else.'],
       note: 'The routine writes the email itself, from your Gmail, to every address you list: your teammates get it too.'
     },
     runNow: ['Select [[Scheduled]] in the sidebar, open your task and select [[Run now]]. The run opens as a session under Scheduled.'],
@@ -1575,7 +1577,7 @@ const hasSkill = () => mode() !== 'none';
 const setupTiles = () => `<div class="tiles three" role="group" aria-label="What you already have">${SETUPS.map(([id, t, d]) => `<button type="button" class="tile" data-setup="${id}" aria-pressed="${mode() === id}"><b>${t}</b><span>${d}</span></button>`).join('')}</div>`;
 const setupLine = () => (SETUPS.find(x => x[0] === mode()) || SETUPS[0])[1];
 
-/* ---------- the nine routines ---------- */
+/* ---------- the eight routines ---------- */
 /* reads: paths inside the team folder; alt: what it reads without a folder; file: the name of each run's file;
    never: the one rule; visual: the one visual in the email */
 const DAYS = [['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'], ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday']];
@@ -1654,7 +1656,7 @@ const ROUTINES = [
     never: 'Never write a priority without the reason for it on file, and never more than three.',
     visual: 'a scorecard with ✅ and ❌ per priority, and one line of block characters for the week',
     why: 'Fifteen minutes on Friday, written for you, from everything your other routines sent this week.' }
-];
+].filter(r => r.id !== 'weekly-review');
 const findRoutine = id => ROUTINES.find(r => r.id === id);
 /* a book cover with the routine's cadence on it */
 const cadText = r => (r.monthly ? 'monthly' : (DAYS.find(d => d[0] === r.day) || DAYS[0])[1].slice(0, 3) + ' ' + r.time);
@@ -1690,14 +1692,14 @@ function s3Ask() {
   const task = r ? job + send + '\n\n' + rules.trim() : '';
   const when = r ? `every ${dayName()} at ${timeOf()}` : '';
   const pickPrompt = full
-    ? `Read every skill in the attached zip: nine folders, each with a SKILL.md. Then read ${folderRef()}: "00 Venture", "01 Discovery" and "02 Validation", including validation-sprint.md if it is there.\n\nPick the three routines from the zip that would help ${v} most over the next four weeks. For each: the skill's name, why us and why now (one line), what it reads from our folder, the file it writes and where, the day and time it should run, and the one thing it must never do. Rank them. Only pick a routine whose inputs exist in our folder or can be found on the web.\n\nThen create a folder "03 Routines" inside our folder and save your answer there as "routines.md".`
-    : `Read every skill in the attached zip: nine folders, each with a SKILL.md. ${hasSkill() ? `Then take ${about}.` : `${about} Ask me up to three questions about ${v} that would change your choice, one at a time, then go on.`}\n\nWe have no shared folder: a routine can only work from what you know about ${v}, the web, and my mail and calendar. Pick the three routines from the zip that would help ${v} most over the next four weeks and that can work that way. For each: the skill's name, why us and why now (one line), what it would work from, the day and time it should run, and the one thing it must never do. Rank them.`;
+    ? `Read every skill in the attached zip: eight folders, each with a SKILL.md. Then read ${folderRef()}: "00 Venture", "01 Discovery" and "02 Validation", including validation-sprint.md if it is there.\n\nPick the three routines from the zip that would help ${v} most over the next four weeks. For each: the skill's name, why us and why now (one line), what it reads from our folder, the file it writes and where, the day and time it should run, and the one thing it must never do. Rank them. Only pick a routine whose inputs exist in our folder or can be found on the web.\n\nThen create a folder "03 Routines" inside our folder and save your answer there as "routines.md".`
+    : `Read every skill in the attached zip: eight folders, each with a SKILL.md. ${hasSkill() ? `Then take ${about}.` : `${about} Ask me up to three questions about ${v} that would change your choice, one at a time, then go on.`}\n\nWe have no shared folder: a routine can only work from what you know about ${v}, the web, and my mail and calendar. Pick the three routines from the zip that would help ${v} most over the next four weeks and that can work that way. For each: the skill's name, why us and why now (one line), what it would work from, the day and time it should run, and the one thing it must never do. Rank them.`;
   return {
     pick: pickPrompt,
     copy: r ? `Copy the ${r.id} skill from the zip I attached, unchanged, into ${folderRef()}, folder "03 Routines", as "${r.id}/SKILL.md": a folder "${r.id}" inside "03 Routines", with the file inside it. Change nothing in the file. Then list the "03 Routines" folder.` : '',
     see: `Search ${folderRef()}. List its folders and the files in each, with dates. Use only that folder, nothing else in my Drive.`,
     task,
-    schedule: r ? `Schedule a task for ${when}${chat() ? '' : ', with approval mode "Automatically approve"'}. Each time:\n\n${task}` : '',
+    schedule: r ? `Schedule a task for ${when}${chat() ? '' : ', with Permissions set to Auto'}. Each time:\n\n${task}` : '',
     once: r ? `Also schedule the same task once, 5 minutes from now, so I can check it before ${dayName()}.` : '',
     list: `List the files in ${folderRef()}, folder "03 Routines", with dates. Read only.`,
     keep: r ? `This changes what you have on file about ${v}: a routine now runs ${when}. It follows the ${r.id} skill${full ? `, saves a file "${r.file}-<date>.md" in our Google Drive folder "${v}", folder "03 Routines",` : ''} and emails it to ${mailList()}. Update what you have on file: show me the old line and the new line first.` : ''
@@ -1829,8 +1831,8 @@ function s3StartPage() {
   const a = app().name, v = esc(vname()), ask = s3Ask(), p = S3_APP[S.app], r = pick(), ch = chat(), full = hasFolder(), m = app();
   const rows = [
     ['Connect your email', `Every run ends as an email to the team. ${a} needs your Gmail for that, and the addresses it may write to.`, 'mail', s3done('mail')],
-    ['Get the routine library', `Nine skills written for work that repeats. One zip. You hand the files to ${a} and it reads them all.`, 'lib', s3done('lib')],
-    ['Ask which routines you need', full ? `${a} reads the nine skills and your folder, and picks the three that matter for ${v} in the next four weeks.` : `${a} reads the nine skills and what it knows about ${v}, and picks the three that can run without a shared folder.`, 'asked', s3done('asked')],
+    ['Get the routine library', `Eight skills written for work that repeats. One zip. You hand the files to ${a} and it reads them all.`, 'lib', s3done('lib')],
+    ['Ask which routines you need', full ? `${a} reads the eight skills and your folder, and picks the three that matter for ${v} in the next four weeks.` : `${a} reads the eight skills and what it knows about ${v}, and picks the three that can run without a shared folder.`, 'asked', s3done('asked')],
     ['Pick one', 'The first one it named. In a team, if a teammate already took it, take your second.', 'picked', !!r],
     full ? ['Put the skill in the folder', `${a} copies the skill into 03 Routines. That is where the routine reads it from, and where your teammates can read it too.`, 'copied', s3done('copied')]
       : [`Add the skill to ${a}`, 'One download, one upload, the way you added skills before. The routine calls it by name.', 'added', s3done('added')],
@@ -1874,7 +1876,7 @@ function s3StartPage() {
       ${s3tick('mail', 'Gmail is connected and the addresses are in')}`)}
 
     ${sec('lib', 'Get the routine library', `
-      <p>One zip with nine folders, one per skill, exactly as their authors published them. You do not read them: ${a} does.</p>
+      <p>One zip with eight folders, one per skill, exactly as their authors published them. You do not read them: ${a} does.</p>
       <div class="row"><button class="btn primary" data-act="library-zip">${ICON.down}Download routine-library.zip</button><span class="fine" style="margin:0">Leave it zipped.</span></div>
       <div class="libgrid">${ROUTINES.map(x => { const kk = findSkill(x.id); return `<a href="#/routine/${x.id}" class="c-${kk.color}">${MARKS[kk.mark] || ''}<b>${esc(x.name)}</b><span>${esc(x.monthly ? 'monthly' : 'weekly')}</span></a>`; }).join('')}</div>
       ${s3tick('lib', 'I have the zip')}`)}
@@ -1882,8 +1884,8 @@ function s3StartPage() {
     ${sec('asked', `Ask ${a} which routines you need`, `
       <p>${newChat()}. Attach the zip with the <kbd class="ui">+</kbd> button, paste this, and send it.${hasSkill() ? '' : ' It will ask you up to three questions first: answer them.'}</p>
       ${copyBox('pick', ask.pick)}
-      <p class="expect"><b>It should:</b> read all nine skills${full ? ', read your folder,' : ''} and name three routines in order, each with why now, what it works from, when, and what it must never do.${full ? ' Then it creates <b>03 Routines</b> in your folder and saves <b>routines.md</b> there.' : ''} It takes a few minutes.</p>
-      <p class="fine">${full ? 'It picks by what is in your folder: a sprint plan, a register, notes in Inbox, numbers. If a routine\'s inputs are not there yet, it says so and picks another.' : 'It picks by what it knows and what it can reach: the web, your mail, your calendar. A routine that needs files nobody has is left out.'}</p>
+      <p class="expect"><b>It should:</b> read all eight skills${full ? ', read your folder,' : ''} and name three routines in order, each with why now, what it works from, when, and what it must never do.${full ? ' Then it creates <b>03 Routines</b> in your folder and saves <b>routines.md</b> there.' : ''} It takes a few minutes.</p>
+      <p class="fine">${full ? 'Its picks follow what is in your folder. With a sprint plan and a ranking in 02 Validation, most teams get Sprint check-in, Competitor watch and Meeting prep. With only the about file and the register, it may name just Competitor watch, because that one reads the web. To get Interview digest, Runway check or Investor update, add what they read first: interview notes in Inbox, or cash, spend and revenue numbers.' : 'It picks by what it knows and what it can reach: the web, your mail, your calendar. A routine that needs files nobody has is left out.'}</p>
       ${s3tick('asked', full ? 'routines.md is in 03 Routines' : 'I have its three routines')}`)}
 
     ${sec('picked', 'Pick one', `
@@ -1918,8 +1920,8 @@ function s3StartPage() {
       <p>${esc(dayName())} is too late to find out it does not work. Check one run now.</p>
       ${p.once ? `<p class="say">${ui(p.runNow[0])}</p>${copyBox('once', ask.once)}` : `<ol class="mini">${p.runNow.map(x => `<li>${ui(x)}</li>`).join('')}</ol>`}
       <div class="checks">
-        ${full ? `<div><i>${EQ_ICON.folder}</i><b>The file</b><span>Open Drive, 03 Routines: a new file <b>${esc(r.file)}-${esc(new Date().toISOString().slice(0, 10))}.md</b>. Read it. One fact wrong? Fix the file it came from, not the task.</span></div>` : ''}
-        <div><i>${EQ_ICON.mail}</i><b>The email</b><span>In your inbox, and in your teammates', with the subject "${v}: ${esc(r.name)}". ${full ? '' : 'Read it as the team will: the point first, the visual, and a "Missing" section for what it did not have. One fact wrong? ' + (hasSkill() ? 'Tell ' + a + ' in a chat: it updates what it has on file.' : 'Fix your line about ' + v + ' in My venture, then paste the task again.') + ' '}Nothing? Open the run under Scheduled: if the send is waiting for your approval, approve it${ch ? '' : ' and set the task to Automatically approve'}.</span></div>
+        ${full ? `<div><i>${EQ_ICON.folder}</i><b>The file</b><span>Open Drive, 03 Routines: a new file <b>${esc(r.file)}-${esc(new Date().toISOString().slice(0, 10))}.md</b>. It may open as a Google Doc: that is fine. Read it. One fact wrong? Fix the file it came from, not the task.</span></div>` : ''}
+        <div><i>${EQ_ICON.mail}</i><b>The email</b><span>In your inbox, and in your teammates', with the subject "${v}: ${esc(r.name)}". ${full ? '' : 'Read it as the team will: the point first, the visual, and a "Missing" section for what it did not have. One fact wrong? ' + (hasSkill() ? 'Tell ' + a + ' in a chat: it updates what it has on file.' : 'Fix your line about ' + v + ' in My venture, then paste the task again.') + ' '}Nothing? Open the run under Scheduled: if the send is waiting for your approval, approve it${ch ? '' : ' and set the task\'s Permissions to Auto'}.</span></div>
       </div>
       ${s3tick('ran', full ? 'The file is in Drive and the email arrived' : 'The email arrived')}
       ${hasSkill() ? `<h3 class="sub">Then tell your venture skill</h3>
@@ -1938,7 +1940,7 @@ function libraryPage() {
   const seen = {}, notices = LIBRARY.filter(k => !seen[k.repo] && (seen[k.repo] = true)).map(k => `<details><summary>${esc(k.author)}: the ${k.license} license</summary><pre class="lic">${esc(LICENSES[k.repo] || '')}</pre></details>`).join('');
   const vol = k => `<a class="vol" href="#/routine/${k.id}">${bookCad(k)}<p>${esc(k.tagline)}</p></a>`;
   return `<header class="head"><h1>The library</h1>
-      <p class="lede">Nine skills written for work that repeats, and the connectors ${a} can use. Open a skill to see when it runs, what it works from and what it sends.</p></header>
+      <p class="lede">Eight skills written for work that repeats, and the connectors ${a} can use. Open a skill to see when it runs, what it works from and what it sends.</p></header>
     <section class="group"><h2>Routine skills</h2><p>Together they are the routine library you download in step ${stepNo('lib')}. ${pick() ? `Yours is <a href="#/routine/${pick().id}">${esc(pick().name)}</a>.` : ''}</p>
       <div class="shelf">${LIBRARY.map(vol).join('')}</div></section>
     <section class="group" id="connectors"><h2>Connectors</h2><p>Each one: connect it, check it, use it. Gmail is where every routine delivers${hasFolder() ? ', and Google Drive is where it lives' : ''}.</p>
@@ -2018,7 +2020,7 @@ function connectorPage(id) {
       <p class="tagline">Connector</p>
       <h1>${esc(c.name)}</h1>
       <p class="lede">${esc(c.what)}</p>
-      ${gmail ? `<p class="heed"><b>This is step ${stepNo('mail')} on Start.</b> The routine sends one email per run through this connector, to the addresses you list there. ${ch ? 'ChatGPT may hold the first send from a scheduled run for your approval: approve it once under Scheduled.' : 'A task set to Automatically approve sends without asking.'}</p>` : ''}
+      ${gmail ? `<p class="heed"><b>This is step ${stepNo('mail')} on Start.</b> The routine sends one email per run through this connector, to the addresses you list there. ${ch ? 'ChatGPT may hold the first send from a scheduled run for your approval: approve it once under Scheduled.' : 'A task with Permissions set to Auto sends without asking.'}</p>` : ''}
       ${drive && !hasFolder() ? `<p class="heed"><b>You said you have no team folder.</b> Your routines work without it. Connect Drive only if you want ${a} to read files you already keep there.</p>` : ''}
       ${(drive || sheets) && hasFolder() ? `<p class="fine">${ui(p.after)} ${ui(p.find)}</p>` : ''}
       <ol class="do">
@@ -2050,7 +2052,7 @@ function connectorPage(id) {
 function libraryZipFiles() {
   const files = [];
   LIBRARY.forEach(k => Object.keys(k.files).forEach(f => files.push({ path: 'routine-library/' + k.id + '/' + f, text: k.files[f] })));
-  const readme = ['# Routine library', '', 'Nine skills, each in its own folder with a SKILL.md, copied exactly as their authors published them. Each one is written for recurring work: something an AI can do every week or every month, from what it knows, from a shared folder, from the web or from your mail.', '']
+  const readme = ['# Routine library', '', 'Eight skills, each in its own folder with a SKILL.md, copied exactly as their authors published them. Each one is written for recurring work: something an AI can do every week or every month, from what it knows, from a shared folder, from the web or from your mail.', '']
     .concat(ROUTINES.map(r => `- ${r.id}: ${findSkill(r.id).tagline}`)).join('\n') + '\n';
   files.push({ path: 'routine-library/README.md', text: readme });
   return files;
