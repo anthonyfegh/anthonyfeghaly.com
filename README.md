@@ -11,4 +11,4 @@ changed a lot, commit, push. Pages rebuilds in about a minute.
 
 - `session-3/`: the routines workbook (7 Oct 2026), downloads as WorkbookRoutines.html.
 
-- `revive/`: Revive Wrapped 2026 demo for Revive (23 Oct 2026). The page is AES-GCM encrypted (PBKDF2-SHA256, 600k rounds); the plain page never enters this repo. Not linked from the shelf; `noindex`.
+- `revive/`: Revive Wrapped 2026 demos for Revive (23 Oct 2026): after the password, a chooser between the member Wrapped and the coach Wrapped. Both pages (and the chooser labels) are one AES-GCM encrypted bundle (PBKDF2-SHA256, 600k rounds); the plain pages never enter this repo. Not linked from the shelf; `noindex`.
