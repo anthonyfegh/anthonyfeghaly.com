@@ -1049,7 +1049,8 @@ const BUILDS = {
   landing: {
     t: 'Landing page + waitlist', d: 'A one-page site with a waitlist. Every sign-up is traction for your deck.',
     skill: 'landing', also: ['frontend-design'], dir: 'site', share: 'web', color: 'poppy', mark: 'canvas',
-    line: () => `${lead('landing')} A landing page for ${V()} with a waitlist. Read venture.md first. Every waitlist button opens ${one(S.form) || '[PASTE YOUR FORM LINK]'}. Save it as site/index.html.`
+    line: () => `${lead('landing')} A landing page for ${V()} with a waitlist. Read venture.md first. Every waitlist button opens ${one(S.form) || '[PASTE YOUR FORM LINK]'}. Save it as site/index.html.`,
+    plain: () => `${lead('landing')} A landing page for ${V()}. Read venture.md first. Save it as site/index.html.`
   },
   runway: {
     t: 'Runway calculator', d: 'An interactive page: move the sliders, see how many months of cash you have.',
@@ -1072,7 +1073,7 @@ const deckLine = () => (S.agent === 'codex'
   ? `${lead('frontend-slides')} ${ref('interview-me')} An investor pitch deck for ${V()}. ${VFILE}`
   : `${lead('frontend-slides')} An investor pitch deck for ${V()}. ${VFILE}`);
 const VFILE = 'Read venture.md first, then interview me only about what is missing.';
-const ventureAsk = () => `Write everything you know about ${V()} into one Markdown file called venture.md: what it does, for whom, where, the stage, the team, our numbers with their dates, what we have tested and learned, our competitors, and what is still unknown. Use only what you know from our chats, your memory, my ${V()} skill and my files. Do not invent anything; mark what you are unsure of. Give me the file to download.`;
+const ventureAsk = () => `Write everything you know about ${V()} into one Markdown file called venture.md`;
 const linkLine = id => `Add this link to the last slide of the pitch deck: ${one(S.site[id]) || '[PASTE YOUR LIVE LINK]'}`;
 
 /* ---------- shared pieces of HTML ---------- */
@@ -1213,7 +1214,7 @@ ${KIT.map((id, i) => `   ${i === KIT.length - 1 ? '└─' : '├─'} ${id}   <
         <li>In the normal ${esc(a.home)} app, not ${esc(a.name)}, start a new chat and paste:</li>
       </ol>
       ${copyBox('venture', ventureAsk())}
-      <p class="expect"><b>It should:</b> list what it knows about ${esc(V())}, mark what it is unsure of, and give you <b>venture.md</b> to download. Read it once: fix anything wrong in the chat and ask for the file again.</p>
+      <p class="expect"><b>It should:</b> give you <b>venture.md</b> to download, with what it knows about ${esc(V())}. Read it once: fix anything wrong in the chat and ask for the file again.</p>
       <ol class="mini" start="2">
         <li>Move <b>venture.md</b> into <b>${esc(folder())}</b>, next to README.md.</li>
       </ol>
@@ -1289,17 +1290,20 @@ function buildPage(id) {
           <p class="expect"><b>It should:</b> unzip it into <code>${esc(a.skills)}/${esc(b.skill)}/</code> and list <b>${esc(b.skill)}</b> with the others. Not listed? ${esc(a.newchat)}, then ask “Which skills can you use?”</p>
           ${tick('add-' + b.skill, `${esc(a.name)} lists ${esc(b.skill)}`)}`)}
         ${step(3, id + '-open', 'Build it', `
-          ${id === 'landing' ? `<p><b>First, the waitlist form</b>, two minutes:</p>
+          ${id === 'landing' ? `<p><b>With a waitlist.</b> First make the form, two minutes:</p>
           ${clicks(['forms.google.com', 'Blank form', `Title: ${V()} waitlist`, 'Question: Email (Short answer, Required)', 'Send', 'Link', 'Copy'])}
-          <div class="field"><input class="input" id="form" placeholder="Paste your form link here: it goes into the line below" value="${esc(S.form)}" autocomplete="off"></div>` : ''}
-          <p>Type this into ${esc(a.name)}, or copy it:</p>
+          <div class="field"><input class="input" id="form" placeholder="Paste your form link here: it goes into the line below" value="${esc(S.form)}" autocomplete="off"></div>
+          <p>Then type this into ${esc(a.name)}, or copy it:</p>
           ${copyBox('build-' + id, b.line())}
+          <p style="margin-top:22px"><b>Without a waitlist.</b> Type this instead:</p>
+          ${copyBox('build-landing-plain', b.plain())}` : `<p>Type this into ${esc(a.name)}, or copy it:</p>
+          ${copyBox('build-' + id, b.line())}`}
           <p class="say">Answer its questions, then let it work. It opens the result in your browser when it is done.</p>
           ${tick(id + '-open', `<b>${esc(b.dir)}/index.html</b> opens in my browser${b.share === 'web' ? ' and looks right in a phone-size window' : ''}`)}`)}
         ${step(4, id + '-true', 'Check it', `
           <p>A page that looks finished is easy to trust. Read it once as an investor would.</p>
           ${tick(id + '-true', 'Nothing on it is made up: every number and name is real, or marked as missing')}
-          ${id === 'landing' ? tick('landing-form', '“Join the waitlist” opens my form, and a test sign-up shows in the form’s Responses') : ''}
+          ${id === 'landing' ? tick('landing-form', 'With a waitlist: “Join the waitlist” opens my form, and a test sign-up shows in the form’s Responses') : ''}
           <p class="fine">Something wrong? Say it in one message: “The price on the page is not ours. Use €12 a month.”</p>`)}
         ${step(5, id + '-shared', 'Share it', share)}
       </ol>
