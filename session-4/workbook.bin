@@ -866,7 +866,7 @@ const COVERS = [
 /* The two agents. Everything that differs between them lives here. */
 const AGENTS = {
   codex: {
-    name: 'Codex', where: 'in the ChatGPT desktop app', skills: '.agents/skills', call: '$', chat: 'chat',
+    name: 'Codex', where: 'in the ChatGPT desktop app', home: 'ChatGPT', skills: '.agents/skills', call: '$', chat: 'chat',
     plan: 'Every ChatGPT plan, including Free and IE’s ChatGPT Edu.',
     get: ['chatgpt.com/download', 'Install the ChatGPT app', 'Sign in'],
     open: ['ChatGPT app', 'Codex', 'Open a folder', 'your build folder'],
@@ -874,7 +874,7 @@ const AGENTS = {
     newchat: 'start a new chat in the same folder'
   },
   claude: {
-    name: 'Claude Code', where: 'in the Claude desktop app', skills: '.claude/skills', call: '/', chat: 'session',
+    name: 'Claude Code', where: 'in the Claude desktop app', home: 'Claude', skills: '.claude/skills', call: '/', chat: 'session',
     plan: 'Claude Pro or higher. The free plan does not include Code.',
     get: ['claude.com/download', 'Install the Claude app', 'Sign in'],
     open: ['Claude app', 'Code', 'Select folder', 'your build folder'],
@@ -1022,6 +1022,8 @@ in the hidden folder ${a.skills}/, so ${a.name} can use them in this folder.
 
 ${KIT.map(id => { const k = findSkill(id); return `  ${k.id.padEnd(18)} ${LOOK[id].tag}\n  ${''.padEnd(18)} by ${k.author} (${k.license}), ${k.url}`; }).join('\n')}
 
+Put venture.md here too: what your AI chat knows about ${V()}. Every skill reads it first.
+
 More skills, one per build, are in the workbook's library. Each one comes as its own zip:
 put it in this folder and ask ${a.name} to unzip it into ${a.skills}/.
 
@@ -1047,28 +1049,30 @@ const BUILDS = {
   landing: {
     t: 'Landing page + waitlist', d: 'A one-page site with a waitlist. Every sign-up is traction for your deck.',
     skill: 'landing', also: ['frontend-design'], dir: 'site', share: 'web', color: 'poppy', mark: 'canvas',
-    line: () => `${lead('landing')} A landing page for ${V()} with a waitlist. Every waitlist button opens ${one(S.form) || '[PASTE YOUR FORM LINK]'}. Save it as site/index.html.`
+    line: () => `${lead('landing')} A landing page for ${V()} with a waitlist. Read venture.md first. Every waitlist button opens ${one(S.form) || '[PASTE YOUR FORM LINK]'}. Save it as site/index.html.`
   },
   runway: {
     t: 'Runway calculator', d: 'An interactive page: move the sliders, see how many months of cash you have.',
     skill: 'runway-calculator', also: ['frontend-design'], dir: 'runway', share: 'web', color: 'petrol', mark: 'pie',
-    line: () => `${lead('runway-calculator')} Work out the runway for ${V()}, then turn it into an interactive calculator page with sliders for price, customers, monthly costs and cash in the bank, using ${ref('frontend-design')}. Save it as runway/index.html.`
+    line: () => `${lead('runway-calculator')} Work out the runway for ${V()} from venture.md, then turn it into an interactive calculator page with sliders for price, customers, monthly costs and cash in the bank, using ${ref('frontend-design')}. Save it as runway/index.html.`
   },
   dashboard: {
     t: 'Founder dashboard', d: 'One page with your assumptions, your key numbers and this week’s work.',
     skill: 'build-dashboard', also: ['interview-me'], dir: 'dashboard', share: 'web', color: 'forest', mark: 'grid',
-    line: () => `${lead('build-dashboard')} A founder dashboard for ${V()}: our assumptions, our key numbers and what we’re working on this week. Interview me first. Save it as dashboard/index.html.`
+    line: () => `${lead('build-dashboard')} A founder dashboard for ${V()}: our assumptions, our key numbers and what we’re working on this week. ${VFILE} Save it as dashboard/index.html.`
   },
   onepager: {
     t: 'Investor one-pager', d: 'The page you leave behind after the pitch, printed or as a PDF.',
     skill: 'one-pager', also: ['frontend-design'], dir: 'one-pager', share: 'pdf', color: 'navy', mark: 'page',
-    line: () => `${lead('one-pager')} An investor one-pager for ${V()}, then make it one printable A4 page in the same look as the deck, using ${ref('frontend-design')}. Save it as one-pager/index.html.`
+    line: () => `${lead('one-pager')} An investor one-pager for ${V()} from venture.md, then make it one printable A4 page in the same look as the deck, using ${ref('frontend-design')}. Save it as one-pager/index.html.`
   }
 };
 const buildDone = id => done(id + '-open') && done(id + '-true') && done(id + '-shared');
 const deckLine = () => (S.agent === 'codex'
-  ? `${lead('frontend-slides')} ${ref('interview-me')} An investor pitch deck for ${V()}. Interview me first.`
-  : `${lead('frontend-slides')} An investor pitch deck for ${V()}. Interview me first.`);
+  ? `${lead('frontend-slides')} ${ref('interview-me')} An investor pitch deck for ${V()}. ${VFILE}`
+  : `${lead('frontend-slides')} An investor pitch deck for ${V()}. ${VFILE}`);
+const VFILE = 'Read venture.md first, then interview me only about what is missing.';
+const ventureAsk = () => `Write everything you know about ${V()} into one Markdown file called venture.md: what it does, for whom, where, the stage, the team, our numbers with their dates, what we have tested and learned, our competitors, and what is still unknown. Use only what you know from our chats, your memory, my ${V()} skill and my files. Do not invent anything; mark what you are unsure of. Give me the file to download.`;
 const linkLine = id => `Add this link to the last slide of the pitch deck: ${one(S.site[id]) || '[PASTE YOUR LIVE LINK]'}`;
 
 /* ---------- shared pieces of HTML ---------- */
@@ -1155,11 +1159,12 @@ function startPage() {
   const rows = [
     ['Open the app', `${a.name} works inside a folder on your computer: it reads files, writes new ones and opens them.`, 'app', done('app-ready')],
     ['Get your build folder', 'One zip with the pitch deck’s skills already inside.', 'folder', done('folder-open') && done('skills-in')],
-    ['Build the pitch deck', 'Everyone. One line to type; the skills ask the questions.', 'deck', done('deck-open') && done('deck-true')],
+    ['Bring what your AI knows', `Your ${a.home} chat writes venture.md. ${a.name} starts in a new folder and remembers nothing.`, 'venture', done('venture-in')],
+    ['Build the pitch deck', 'Everyone. One line to type; the skills ask only what is missing.', 'deck', done('deck-open') && done('deck-true')],
     ['Pick what comes next', 'One, two, or all four. Each has its own page and its own skill.', 'next', Object.keys(BUILDS).some(buildDone)]
   ];
   const next = rows.findIndex(x => !x[3]);
-  const WHEN = ['Do this first', 'Then do this', 'Then do this', 'Then pick'];
+  const WHEN = ['Do this first', 'Then do this', 'Then do this', 'Then do this', 'Then pick'];
   const sec = (key, n, title, body, isDone) => `<section class="sec step ${isDone ? 'done' : ''}" id="${key}"><div class="step-n">${isDone ? ICON.check : n}</div><h2>${title}</h2>${body}</section>`;
   const fork = `<div class="fork" aria-label="Everyone builds the deck, then picks">
       <div class="fork-deck"><small>Everyone</small><b>The pitch deck</b><span>built from your answers</span></div>
@@ -1202,27 +1207,40 @@ ${KIT.map((id, i) => `   ${i === KIT.length - 1 ? '└─' : '├─'} ${id}   <
         win ? 'You can’t see the skills folder in File Explorer: it is hidden. That is normal; the agent sees it.' : 'You can’t see the skills folder in Finder: it is hidden. That is normal; <kbd class="ui">⌘ Shift .</kbd> shows hidden folders.',
         'Using the other app instead? Switch it in the sidebar and download the zip again: each app keeps skills in a different hidden folder.'])}`, done('folder-open') && done('skills-in'))}
 
-    ${sec('deck', 3, 'Build the pitch deck', `
+    ${sec('venture', 3, 'Bring what your AI knows', `
+      <p>${esc(a.name)} works in a new folder: it has none of your chats, memory or files. Your ${esc(a.home)} chat has all of them. It writes them into one file the skills read first.</p>
+      <ol class="mini">
+        <li>In the normal ${esc(a.home)} app, not ${esc(a.name)}, start a new chat and paste:</li>
+      </ol>
+      ${copyBox('venture', ventureAsk())}
+      <p class="expect"><b>It should:</b> list what it knows about ${esc(V())}, mark what it is unsure of, and give you <b>venture.md</b> to download. Read it once: fix anything wrong in the chat and ask for the file again.</p>
+      <ol class="mini" start="2">
+        <li>Move <b>venture.md</b> into <b>${esc(folder())}</b>, next to README.md.</li>
+      </ol>
+      ${tick('venture-in', 'venture.md is in my build folder')}
+      <p class="fine">Your chat knows nothing about ${esc(V())} either? Skip this step: the skills interview you from scratch.</p>`, done('venture-in'))}
+
+    ${sec('deck', 4, 'Build the pitch deck', `
       <p>Everyone does this one. Type this into ${esc(a.name)}, or copy it:</p>
       ${copyBox('deck', deckLine())}
       <ol class="flowline">
-        <li><b>It interviews you</b> about ${esc(V())}, one question at a time, with its best guess. Correct the guess, or say “I don’t know yet”.</li>
+        <li><b>It reads venture.md, then interviews you</b> about what is missing, one question at a time, with its best guess. Correct the guess, or say “I don’t know yet”.</li>
         <li><b>Four quick choices:</b> what the deck is for, how long, whether you have content, how dense the slides are.</li>
         <li><b>Three looks</b> appear as small previews. Pick one.</li>
         <li><b>It builds the deck</b> and opens it in your browser. A few minutes.</li>
       </ol>
       <p class="expect">${S.agent === 'claude'
-        ? `<b>Made a ${esc(V())} skill in Claude before?</b> Claude Code loads it when you are signed in with the same account and the skill is switched on (Customize › Skills). Type <code>/skills</code> to check. Then it asks fewer questions.`
-        : '<b>Codex can’t see your ChatGPT chats, memory or skills.</b> That is fine: it asks you instead. Answer in your own words.'}</p>
+        ? `<b>Claude Code can’t see your Claude chats or memory.</b> That is what venture.md is for. Bonus: if your ${esc(V())} skill from session 1 is switched on in the same account, type <code>/skills</code> to see it.`
+        : '<b>Codex can’t see your ChatGPT chats, memory or skills.</b> That is what venture.md is for. Without it, it asks you everything.'}</p>
       ${tick('deck-open', 'The deck opens in my browser and the arrow keys move between slides')}
       ${tick('deck-true', 'Every number on it is real, or marked as missing')}
       <p class="fine"><b>Change anything by asking.</b> “Slide 4 has too much text.” “Use our logo from logo.png.” “Make the problem slide about one customer.” One message each.</p>
-      ${fix(['It started building without asking: stop it and type “Interview me first.”',
+      ${fix(['It asked nothing about your startup: check venture.md is in the folder, then type “Read venture.md and tell me what you know.”', 'It started building without asking: stop it and type “Interview me first.”',
         'It offers to deploy the deck or export a PDF with extra tools: say no for now. Both need installs. Present it from the browser.',
         'Nothing opens: ask “Open the deck in my browser”, or double-click the .html file in your folder.',
         'It made up a number: “Remove every number I didn’t give you, and mark the gap.”'])}`, done('deck-open') && done('deck-true'))}
 
-    ${sec('next', 4, 'Pick what comes next', `
+    ${sec('next', 5, 'Pick what comes next', `
       <p>One, two, or all four. Each one has its own page: get its skill, add it to your folder, type one line, check it, share it.</p>
       <div class="rcs">${Object.keys(BUILDS).map((id, i) => { const b = BUILDS[id]; return `<a class="rc c-${b.color} ${buildDone(id) ? 'on' : ''}" href="#/build/${id}" style="--i:${i}">
         <div class="rc-cover">${MARKS[b.mark]}<b>${esc(b.t)}</b><small>${esc(b.skill)}</small>${buildDone(id) ? '<span class="rc-stamp">Built</span>' : ''}</div>
